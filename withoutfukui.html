@@ -19,7 +19,8 @@ title.textContent = document.title;
 const url = "./fukui-answer.csv";
 const data = await CSV.fetch(url);
 console.log(data[0]);
-const csv = CSV.toJSON(data);
+const csv2 = CSV.toJSON(data);
+const csv = csv2.filter(c => c.都道府県 != "福井県");
 console.log(csv);
 
 const names = "都道府県,年代,性別,登録施設,世帯年収,回答月,満足度,不便さ,NPS".split(",");
