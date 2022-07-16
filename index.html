@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>福井県観光アンケート（福井県観光連盟）</title>
+<title>福井県観光アンケート（データ出典：福井県観光連盟）</title>
 </head><body>
 <h1 id=title></h1>
 
@@ -22,7 +22,17 @@ console.log(data[0]);
 const csv = CSV.toJSON(data);
 console.log(csv);
 
-const names = "性別,年代,都道府県".split(",");
+const names = "都道府県,年代,性別,登録施設,世帯年収,回答月".split(",");
+
+const sort = (obj) => {
+  const names = Object.keys(obj).sort();
+  const res = {};
+  for (const name of names) {
+    res[name] = obj[name];
+  }
+  return res;
+};
+
 const show = () => {
   divpie.innerHTML = "";
 
@@ -57,6 +67,7 @@ const show = () => {
           data[v]++;
         }
       }
+      const data2 = sort(data);
       const chart = new ChartPie(data);
       divpie.append(chart);
     }
@@ -89,7 +100,7 @@ const cr = (tag) => document.createElement(tag);
 
 const sels = names;
 for (const sel of sels) {
-  const names = ArrayUtil.toUnique(csv.map(a => a[sel]));
+  const names = ArrayUtil.toUnique(csv.map(a => a[sel])).sort();
   const s = cr("select");
   s.appendChild(cr("option"));
   names.forEach(name => {
