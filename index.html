@@ -22,7 +22,7 @@ console.log(data[0]);
 const csv = CSV.toJSON(data);
 console.log(csv);
 
-const names = "都道府県,年代,性別,登録施設,世帯年収,回答月".split(",");
+const names = "都道府県,年代,性別,登録施設,世帯年収,回答月,満足度,不便さ".split(",");
 
 const sort = (obj) => {
   const names = Object.keys(obj).sort();
