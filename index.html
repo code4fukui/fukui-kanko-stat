@@ -6,8 +6,8 @@
 <div id=divsels></div>
 <div id=divpie></div>
 <hr>
-<a href=./data/fukui-answer.csv>CSVデータ</a>
- (<a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+<a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
+ (<a href=https://github.com/code4fukui/fukui-kanko-survey/>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
 
 <script type="module">
 import { ChartPie } from "https:js.sabae.cc/Chart.js";
@@ -16,7 +16,8 @@ import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 
 title.textContent = document.title;
 
-const url = "./fukui-answer.csv";
+//const url = "./fukui-answer.csv";
+const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
 const data = await CSV.fetch(url);
 console.log(data[0]);
 const csv = CSV.toJSON(data);
