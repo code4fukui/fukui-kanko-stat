@@ -1,7 +1,7 @@
 # fukui-kanko-stat
  
-- [全件](https://code4fukui.github.io/fukui-kanko-stat/)
-- [福井県意外](https://code4fukui.github.io/fukui-kanko-stat/withoutfukui.html)
+- [観光オープンデータ簡易分析](https://code4fukui.github.io/fukui-kanko-stat/)
+- [観光オープンデータ簡易分析(福井県意外からの来訪者)](https://code4fukui.github.io/fukui-kanko-stat/withoutfukui.html)
 
 ## 福井観光アンケートオープンデータ
 
