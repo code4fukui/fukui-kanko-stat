@@ -2,6 +2,7 @@
  
 - [観光オープンデータ簡易分析](https://code4fukui.github.io/fukui-kanko-stat/)
 - [観光オープンデータ簡易分析(福井県意外からの来訪者)](https://code4fukui.github.io/fukui-kanko-stat/withoutfukui.html)
+- [福井県観光オープンデータ回答数推移(日別)](https://code4fukui.github.io/fukui-kanko-stat/daily.html)
 
 ## 福井観光アンケートオープンデータ
 
