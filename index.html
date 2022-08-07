@@ -24,7 +24,7 @@ const csv = CSV.toJSON(data);
 console.log(csv);
 
 // 登録施設
-const names = "都道府県,年代,性別,回答エリア2,世帯年収,回答月,満足度,不便さ,NPS,宿泊数（県内）,今後の来訪意向".split(",");
+const names = "都道府県,年代,性別,6分類,回答エリア2,世帯年収,回答月,満足度,不便さ,NPS,宿泊数（県内）,今後の来訪意向".split(",");
 
 const sort = (obj) => {
   const names = Object.keys(obj).sort();
@@ -103,6 +103,12 @@ const cr = (tag) => document.createElement(tag);
 const sels = names;
 for (const sel of sels) {
   const names = ArrayUtil.toUnique(csv.map(a => a[sel])).sort();
+  const box = cr("span");
+  box.style.display = "inline-block";
+  const txt = cr("span");
+  txt.textContent = sel;
+  box.appendChild(txt);
+  box.appendChild(cr("br"));
   const s = cr("select");
   s.appendChild(cr("option"));
   names.forEach(name => {
@@ -110,7 +116,8 @@ for (const sel of sels) {
     opt.textContent = name;
     s.appendChild(opt);
   });
-  divsels.appendChild(s);
+  box.appendChild(s);
+  divsels.appendChild(box);
   s.dataname = sel;
   s.onchange = show;
 }
