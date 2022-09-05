@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>福井県観光アンケート（データ出典：福井県観光連盟）</title>
+</head><body>
+<h1 id=title></h1>
+
+<div id=divsels></div>
+<div id=divpie></div>
+<hr>
+<a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
+ (<a href=https://github.com/code4fukui/fukui-kanko-survey/>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+
+<script type="module">
+import { ChartPie } from "https://code4fukui.github.io/chart-pie-mermaid/chart-pie.js";
+//import { ChartPie } from "https://code4fukui.github.io/chart-pie/chart-pie.js";
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+
+title.textContent = document.title;
+
+//const url = "./fukui-answer.csv";
+const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+const data = await CSV.fetch(url);
+console.log(data[0]);
+const csv = CSV.toJSON(data);
+console.log(csv);
+
+// 登録施設
+const names = "都道府県,年代,性別,6分類,回答エリア2,世帯年収,回答月,満足度,不便さ,NPS,宿泊数（県内）,今後の来訪意向,同行者".split(",");
+
+const sort = (obj) => {
+  const names = Object.keys(obj).sort();
+  const res = {};
+  for (const name of names) {
+    res[name] = obj[name];
+  }
+  return res;
+};
+
+const show = () => {
+  divpie.innerHTML = "";
+
+  console.log(divsels.querySelectorAll("select"));
+  const node2array = (nodes) => {
+    const res = [];
+    for (const n of nodes) {
+      res.push(n);
+    }
+    return res;
+  };
+  const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, s.value]);
+  const csv2 = csv.filter(c => {
+    for (const key of keys) {
+      if (key[1]) {
+        if (c[key[0]] != key[1]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  });
+
+  if (csv2.length) {
+    for (const name of names) {
+      const data = {};
+      for (const d of csv2) {
+        const v = d[name];
+        if (!data[v]) {
+          data[v] = 1;
+        } else {
+          data[v]++;
+        }
+      }
+      const data2 = sort(data);
+      console.log(data);
+      const chart = new ChartPie(data);
+      divpie.append(chart);
+      break;
+    }
+
+      /*
+    const cnts = [7, 8, 11];
+    for (const n of cnts) {
+      const q = "Q" + n;
+      const names = Object.keys(csv2[0]).filter(a => a.startsWith(q + ":"));
+      const data = {};
+      for (const d of csv2) {
+        for (const name of names) {
+          if (d[name] == "1") {
+            if (!data[name]) {
+              data[name] = 1;
+            } else {
+              data[name]++;
+            }
+          }
+        }
+      }
+      const chart = new ChartPie(data);
+      divpie.append(chart);
+    }
+    */
+  }
+};
+
+const cr = (tag) => document.createElement(tag);
+
+const sels = names;
+for (const sel of sels) {
+  const names = ArrayUtil.toUnique(csv.map(a => a[sel])).sort();
+  const box = cr("span");
+  box.style.display = "inline-block";
+  const txt = cr("span");
+  txt.textContent = sel;
+  box.appendChild(txt);
+  box.appendChild(cr("br"));
+  const s = cr("select");
+  s.appendChild(cr("option"));
+  names.forEach(name => {
+    const opt = cr("option");
+    opt.textContent = name;
+    s.appendChild(opt);
+  });
+  box.appendChild(s);
+  divsels.appendChild(box);
+  s.dataname = sel;
+  s.onchange = show;
+}
+
+show();
+
+</script>
+
+<style>
+body {
+  text-align: center;
+  font-family: sans-serif;
+}
+textarea {
+  width: 70vw;
+  height: 8em;
+}
+</style>
+
