@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>福井県観光アンケート コメント新着順（データ出典：福井県観光連盟）</title>
+  </head><body>
+  <h1 id=title></h1>
+  
+  <div id=main></div>
+
+  <div id=credit><a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a></div>
+  
+  <script type="module">
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  
+  title.textContent = document.title;
+  
+  const nshow = 1000;
+
+  //const url = "./fukui-answer.csv";
+  const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+  const data = CSV.toJSON(await CSV.fetch(url));
+  data.reverse();
+  const names = "回答日時,満足度,NPS,都道府県,年代,性別,登録施設".split(",");
+  for (let i = 0; i < Math.min(nshow, data.length); i++) {
+    const d = data[i];
+    const comment = d.満足度の理由;
+    if (!comment) {
+      continue;
+    }
+    const s = [];
+    const goodbad = ["good", "good", "notbad", "bad", "bad"][["とても満足", "満足", "どちらでもない", "不満", "とても不満"].indexOf(d.満足度)];
+    s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
+    for (const n of names) {
+      s.push(`${n}: ${d[n]}`);
+    }
+    s.push("<hr>");
+    main.innerHTML += s.join("\n");
+  }
+  
+  </script>
+  
+  <style>
+  body {
+    font-family: sans-serif;
+  }
+  .comment {
+    font-size: 120%;
+    font-weight: bold;
+  }
+  .good {
+    color: rgb(61, 99, 250);
+  }
+  .bad {
+    color: red;
+  }
+  .notbad {
+    color: rgb(155, 155, 22);
+  }
+ </style>
+  
+  
