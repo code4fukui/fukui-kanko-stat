@@ -71,7 +71,14 @@ const show = () => {
       }
       const data2 = sort(data);
       const chart = new ChartPie(data);
-      divpie.append(chart);
+      const div2 = document.createElement("div");
+      div2.style.display = "inline-block";
+      const div3 = document.createElement("span");
+      div3.textContent = name;
+      div2.appendChild(div3);
+      div2.appendChild(document.createElement("br"));
+      div2.appendChild(chart);
+      divpie.append(div2);
     }
 
       /*
