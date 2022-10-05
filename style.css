@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: white;
+}
+.menu {
+  margin: 0;
+  padding: 10px 0 4px 0;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  background-color: #F7F7F7;
+  background: linear-gradient(#d9d9d9, #f7f7f7 10px);
+  color: #222122;
+  cursor: pointer;
+}
+main {
+  padding: 0 .7em;
+}

@@ -16,7 +16,7 @@
   <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
 </div>
 
-<div id=main></div>
+<main id=main></main>
 
 <div id=credit>
   <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
@@ -27,6 +27,7 @@
 import { CSV } from "https://js.sabae.cc/CSV.js";
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import { ChartPie } from "https://js.sabae.cc/Chart.js";
+import {} from "./header.js";
 
 const st = document.title;
 title.textContent = st.substring(0, st.indexOf("（"));
