@@ -8,13 +8,15 @@ const insertFirst = (parent, c) => {
   }
 };
 
-const url = "./apps.csv";
+const base = location.href.indexOf("[::]") >= 0 ? "./" : "https://code4fukui.github.io/fukui-kanko-stat/";
+
+const url = base + "apps.csv";
 const smenu = await CSV.fetchJSON(url);
 console.log(smenu);
 
 const css = document.createElement("link");
 css.rel = "stylesheet";
-css.href = location.href.indexOf("[::]") >= 0 ? "style.css" : "https://code4fukui.github.io/fukui-kanko-stat/style.css";
+css.href = base + "style.css";
 document.head.appendChild(css);
 
 const menu = document.createElement("ul");
