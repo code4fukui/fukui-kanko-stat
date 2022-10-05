@@ -1,7 +1,9 @@
 name,url
 観光オープンデータ簡易分析,./
 観光オープンデータ簡易分析(福井県外からの来訪者),./withoutfukui.html
-福井県観光オープンデータ回答数推移(日別),./daily.html
-福井県観光アンケートコメントマップ,https://code4fukui.github.io/sightseeingApp/
-福井県観光オープンデータコメント新着順,./comment.html
-福井観光エリア満足度ランキング,./ranking.html
+回答数推移(日別),./daily.html
+コメントマップ,https://code4fukui.github.io/sightseeingApp/
+エリア満足度ランキング,./ranking.html
+コメント新着順,./comment.html
+リピート意向率ランキング,./ranking-wish.html
+来訪意向と福井県に求めるもの,./comment-wish.html
