@@ -1,9 +1,9 @@
 name,url
-観光オープンデータ簡易分析,./
-観光オープンデータ簡易分析(県外),./withoutfukui.html
-回答数推移(日別),./daily.html
+観光オープンデータ簡易分析,https://code4fukui.github.io/fukui-kanko-stat/
+観光オープンデータ簡易分析(県外),https://code4fukui.github.io/fukui-kanko-stat/withoutfukui.html
+回答数推移(日別),https://code4fukui.github.io/fukui-kanko-stat/daily.html
 コメントマップ,https://code4fukui.github.io/sightseeingApp/
-エリア満足度ランキング,./ranking.html
-コメント新着順,./comment.html
-リピート意向率ランキング,./ranking-wish.html
-来訪意向と福井県に求めるもの,./comment-wish.html
+エリア満足度ランキング,https://code4fukui.github.io/fukui-kanko-stat/ranking.html
+コメント新着順,https://code4fukui.github.io/fukui-kanko-stat/comment.html
+リピート意向率ランキング,https://code4fukui.github.io/fukui-kanko-stat/ranking-wish.html
+来訪意向と福井県に求めるもの,https://code4fukui.github.io/fukui-kanko-stat/comment-wish.html
