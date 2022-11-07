@@ -53,7 +53,7 @@ const getArea = () => {
 const show = () => {
   location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0);
   main.innerHTML = "";
-  const names = "回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
+  const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
   let cnt = 0;
   const s = [];
   const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
@@ -83,7 +83,11 @@ const show = () => {
       if (filterarea && n == "回答エリア2") {
         continue;
       }
-      s.push(`${n}: ${d[n]}`);
+      if (n == "会員ID") {
+        s.push(`${n}: <a href=detail.html#id=${d[n]}>${d[n]}</a>`);
+      } else {
+        s.push(`${n}: ${d[n]}`);
+      }
     }
     s.push("<hr>");
     if (cnt++ == nshow) {

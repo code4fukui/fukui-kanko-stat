@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>福井県観光アンケート 詳細（データ出典：福井県観光連盟）</title>
+<meta name="twitter:card" content="summary_large_image">
+</head><body>
+<header>
+  <h1>福井県観光アンケート 詳細</h1>
+  <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html>データ出典：福井県観光連盟</a>
+</header>
+
+<div id=settings>
+  <select id=selarea><option>すべてのエリア</option></select>
+  <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
+  <label><input id="chkwithout2" type="checkbox">複数回答の方のみ</label>
+  <span id=ndata>-</span>件
+</div>
+
+<main id=main>
+</main>
+
+<div id=credit>
+  <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
+  <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
+  <qr-code></qr-code><br>
+</div>
+
+<script type="module">
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+import {} from "./header.js";
+
+const nshow = 100;
+let showid = -1;
+
+//const url = "./fukui-answer.csv";
+const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+const data = CSV.toJSON(await CSV.fetch(url));
+data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
+
+const cutnames = [
+  "宿でのんびり過ごす", "温泉や露天風呂", "地元の美味しいものを食べる", "花見や紅葉などの自然鑑賞", "名所、旧跡の観光", "テーマパーク（遊園地、動物園、博物館など）", "買い物、アウトレット", "お祭りやイベントへの参加・見物", "スポーツ観戦や芸能鑑賞（コンサート等）", "アウトドア（海水浴、釣り、登山など）", "まちあるき、都市散策", "各種体験（手作り、果物狩りなど）", "スキー・スノボ、マリンスポーツ", "その他スポーツ（ゴルフ、テニスなど）", "ドライブ・ツーリング", "友人・親戚を尋ねる", "出張など仕事関係", "その他",
+  "観光展・物産展", "新聞・雑誌・ガイドブック", "TV・ラジオ番組やCM", "観光パンフレット・ポスター", "観光連盟やDMOのHP", "インターネット・アプリ", "Twitter", "Instagram", "Facebook", "ブログ", "友人・知人", "観光協会等の案内所", "タクシードライバーや地元の人", "宿泊施設",
+  "自家用車", "レンタカー", "新幹線", "在来線", "飛行機", "旅行会社ツアーバス",
+  "タクシー", "路線バス", "徒歩", "レンタサイクル",
+];
+data.forEach(d => {
+  for (const name of cutnames) {
+    delete d[name];
+  }
+});
+
+const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
+areas.forEach(a => {
+  const opt = document.createElement("option");
+  opt.textContent = a;
+  selarea.appendChild(opt);
+});
+const getArea = () => {
+  const v = selarea.value;
+  return v == "すべてのエリア" ? 0 : parseInt(v);
+};
+
+const makeTableFromJSON = (d) => {
+  const cr = (tag, p) => {
+    const c = document.createElement(tag);
+    if (p) {
+      p.appendChild(c);
+    }
+    return c;
+  };
+  const tbl = cr("table");
+  for (const name in d) {
+    const tr = cr("tr", tbl);
+    cr("th", tr).textContent = name;
+    cr("td", tr).textContent = d[name];
+  }
+  return tbl;
+};
+
+const filteredRepeater = () => {
+  if (!chkwithout2.checked) {
+    return data;
+  }
+
+  const p = {};
+  for (const d of data) {
+    const id = d.会員ID;
+    if (!p[id]) {
+      p[id] = 0;
+    }
+    p[id]++;
+  }
+  const p2 = Object.entries(p).sort((a, b) => b[1] - a[1]);
+  console.log(p2.slice(0, 100));
+
+  const res = [];
+  for (const d of data) {
+    const id = d.会員ID;
+    if (p[id] > 1) {
+      res.push(d);
+    }
+  }
+
+  return res;
+};
+
+const filteredID = (showid) => {
+  const res = [];
+  for (let i = 0; i < data.length; i++) {
+    const d = data[i];
+    if (d.会員ID == showid) {
+      res.push(d);
+    }
+  }
+  return res;
+};
+
+const filtered = () => {
+  const res = [];
+  if (showid >= 0) {
+    return filteredID(showid);
+  }
+  const data = filteredRepeater(chkwithout2.checked);
+  for (let i = 0; i < data.length; i++) {
+    const d = data[i];
+    if (chkwithout.checked && d.都道府県 == "福井県") {
+      continue;
+    }
+    const filterarea = selarea.value != "すべてのエリア";
+    if (filterarea && d.回答エリア2 != selarea.value) {
+      continue;
+    }
+    res.push(d);
+  }
+  return res;
+};
+
+const show = () => {
+  if (showid >= 0) {
+    location.hash = "id=" + showid;
+  } else {
+    location.hash = [
+      getArea(),
+      chkwithout.checked ? 1 : 0,
+      chkwithout2.checked ? 1 : 0,
+    ].join(",");
+  }
+  main.innerHTML = "";
+  let cnt = 0;
+  const data = filtered();
+  ndata.textContent = data.length;
+  for (let i = 0; i < data.length; i++) {
+    const d = data[i];
+    const tbl = makeTableFromJSON(d);
+    main.appendChild(tbl);
+    if (cnt++ == nshow) {
+      break;
+    }
+  }
+};
+if (location.hash.length > 1) {
+  const [narea, chk, chk2] = location.hash.substring(1).split(",");
+  if (narea) {
+    if (narea.startsWith("id=")) {
+      showid = narea.substring(3);
+      settings.style.display = "none";
+    } else {
+      selarea.selectedIndex = narea;
+    }
+  }
+  if (chk) {
+    chkwithout.checked = chk == "1";
+  }
+  if (chk2) {
+    chkwithout2.checked = chk2 == "1";
+  }
+}
+show();
+selarea.onchange = chkwithout.onchange = chkwithout2.onchange = () => show();
+
+</script>
+
+<style>
+body {
+  font-family: sans-serif;
+}
+header {
+  margin: 1em;
+}
+h1 {
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+#subtitle {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+}
+.comment {
+  font-size: 120%;
+  font-weight: bold;
+}
+.good {
+  color: rgb(61, 99, 250);
+}
+.bad {
+  color: red;
+}
+.notbad {
+  color: rgb(155, 155, 22);
+}
+#qr {
+  text-align: center;
+}
+#qr {
+  margin-bottom: 2em;
+}
+#settings {
+  text-align: center;
+  margin: 1.5em;
+}
+#main {
+  text-align: center;
+}
+table {
+  border-collapse: collapse;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 1.5em;
+}
+th, td {
+  border: 1px solid;
+  padding: .2em .4em;
+}
+th {
+  text-align: left;
+  width: 8em;
+}
+td {
+  text-align: left;
+  x-width: 100%;
+}
+input, label, select {
+  font-size: 14px;
+}
+#credit {
+  text-align: center;
+}
+</style>
+
+</body>
+</html>
