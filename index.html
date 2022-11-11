@@ -12,6 +12,7 @@
 
 <script type="module">
 import { ChartPie } from "./ChartPie.js";
+import { ChartBar } from "./ChartBar.js";
 import { CSV } from "https://js.sabae.cc/CSV.js";
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import {} from "./header.js";
@@ -25,8 +26,54 @@ console.log(data[0]);
 const csv = CSV.toJSON(data);
 console.log(csv);
 
-// 登録施設
-const names = "都道府県,年代,性別,6分類,回答エリア2,世帯年収,回答月,満足度,不便さ,NPS,宿泊数（県内）,今後の来訪意向,同行者".split(",");
+// チャートの種類
+const chartType = {
+  "pie": "円グラフ",
+  "bar": "棒グラフ"
+}
+
+// 各チャートの情報
+let charts = {
+  "都道府県": {
+    type: chartType["pie"]
+  },
+  "年代": {
+    type: chartType["bar"]
+  },
+  "性別": {
+    type: chartType["pie"]
+  },
+  "6分類": {
+    type: chartType["pie"]
+  },
+  "回答エリア2": {
+    type: chartType["pie"]
+  },
+  "世帯年収": {
+    type: chartType["bar"]
+  },
+  "回答月": {
+    type: chartType["pie"]
+  },
+  "満足度": {
+    type: chartType["pie"]
+  },
+  "不便さ": {
+    type: chartType["pie"]
+  },
+  "NPS": {
+    type: chartType["pie"]
+  },
+  "宿泊数（県内）": {
+    type: chartType["pie"]
+  },
+  "今後の来訪意向": {
+    type: chartType["pie"]
+  },
+  "同行者": {
+    type: chartType["pie"]
+  }
+};
 
 const sort = (obj) => {
   const names = Object.keys(obj).sort();
@@ -35,6 +82,29 @@ const sort = (obj) => {
     res[name] = obj[name];
   }
   return res;
+};
+
+const onChangeChartSelect = (title, index, event) => {
+  charts[title]["type"] = event.target.value;
+  changeChart(title, index);
+};
+
+const changeChart = (title, index) => {
+  const chartPie = document.getElementById("chart-pie" + index);
+  const chartBar = document.getElementById("chart-bar" + index);
+
+  switch (charts[title]["type"]) {
+    case chartType["pie"]:
+      chartPie.style.display = "inline-block";
+      chartBar.style.display = "none";
+      break;
+    case chartType["bar"]:
+      chartPie.style.display = "none";
+      chartBar.style.display = "inline-block";
+      break;
+    default:
+      break;
+  }
 };
 
 const show = () => {
@@ -48,7 +118,17 @@ const show = () => {
     }
     return res;
   };
-  const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, s.value]);
+
+  const generateKeys = (selectedOptions) => {
+    const keys = [];
+    for (let i = 0; i < selectedOptions.length; i++) {
+      keys.push(selectedOptions[i].value);
+    }
+    // 空要素は削除
+    return keys.filter(Boolean);
+  }
+
+  const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
   const fromDate = dayjs(document.getElementById("fromDate").value);
   const toDate = dayjs(document.getElementById("toDate").value);
   
@@ -59,17 +139,19 @@ const show = () => {
     }
 
     for (const key of keys) {
-      if (key[1]) {
-        if (c[key[0]] != key[1]) {
+      if (key[1].length != 0) {
+        if (!key[1].includes(c[key[0]])) {
           return false;
         }
       }
     }
+
     return true;
   });
 
   if (csv2.length) {
-    for (const name of names) {
+    const names = Object.keys(charts);
+    names.forEach((name, index) => {
       const data = {};
       for (const d of csv2) {
         const v = d[name];
@@ -80,16 +162,33 @@ const show = () => {
         }
       }
       const data2 = sort(data);
-      const chart = new ChartPie(data);
+      const chartPie = new ChartPie(data);
+      chartPie.id = "chart-pie" + index;
+      const chartBar = new ChartBar(data);
+      chartBar.id = "chart-bar" + index;
       const div2 = document.createElement("div");
       div2.style.display = "inline-block";
-      const div3 = document.createElement("span");
-      div3.textContent = name + ` (${csv2.length}件)`;
-      div2.appendChild(div3);
+      const span = document.createElement("span");
+      span.textContent = name + ` (${csv2.length}件)`;
+      const chartSelect = document.createElement("select");
+      chartSelect.onchange = onChangeChartSelect.bind(null, name, index);
+      for (const key in chartType) {
+        const opt = cr("option");
+        opt.textContent = chartType[key];
+        if (charts[name]["type"] == chartType[key]) {
+          opt.selected = true;
+        }
+        chartSelect.appendChild(opt);
+      };
+      span.appendChild(document.createElement("br"));
+      span.appendChild(chartSelect);
+      div2.appendChild(span);
       div2.appendChild(document.createElement("br"));
-      div2.appendChild(chart);
+      div2.appendChild(chartPie);
+      div2.appendChild(chartBar);
       divpie.append(div2);
-    }
+      changeChart(name, index)
+    });
 
       /*
     const cnts = [7, 8, 11];
@@ -112,12 +211,12 @@ const show = () => {
       divpie.append(chart);
     }
     */
-  }
+  };
 };
 
 const cr = (tag) => document.createElement(tag);
 
-const sels = names;
+const sels = Object.keys(charts);
 for (const sel of sels) {
   const names = ArrayUtil.toUnique(csv.map(a => a[sel])).sort();
   const box = cr("span");
@@ -127,8 +226,12 @@ for (const sel of sels) {
   box.appendChild(txt);
   box.appendChild(cr("br"));
   const s = cr("select");
+  s.setAttribute("multiple", true);
   s.appendChild(cr("option"));
   names.forEach(name => {
+    if (!name) {
+      return;
+    }
     const opt = cr("option");
     opt.textContent = name;
     s.appendChild(opt);
