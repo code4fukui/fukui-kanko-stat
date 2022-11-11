@@ -117,15 +117,27 @@ const show = () => {
     }
     return res;
   };
-  const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, s.value]);
+
+  const generateKeys = (selectedOptions) => {
+    const keys = [];
+    for (let i = 0; i < selectedOptions.length; i++) {
+      keys.push(selectedOptions[i].value);
+    }
+    // 空要素は削除
+    return keys.filter(Boolean);
+  }
+
+  const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
+
   const csv2 = csv.filter(c => {
     for (const key of keys) {
-      if (key[1]) {
-        if (c[key[0]] != key[1]) {
+      if (key[1].length != 0) {
+        if (!key[1].includes(c[key[0]])) {
           return false;
         }
       }
     }
+
     return true;
   });
 
@@ -206,8 +218,12 @@ for (const sel of sels) {
   box.appendChild(txt);
   box.appendChild(cr("br"));
   const s = cr("select");
+  s.setAttribute("multiple", true);
   s.appendChild(cr("option"));
   names.forEach(name => {
+    if (!name) {
+      return;
+    }
     const opt = cr("option");
     opt.textContent = name;
     s.appendChild(opt);
