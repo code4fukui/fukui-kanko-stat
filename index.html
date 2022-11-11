@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>福井県観光アンケート（データ出典：福井県観光連盟）</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
 </head><body>
 <h1 id=title></h1>
 
@@ -128,8 +129,15 @@ const show = () => {
   }
 
   const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-
+  const fromDate = dayjs(document.getElementById("fromDate").value);
+  const toDate = dayjs(document.getElementById("toDate").value);
+  
   const csv2 = csv.filter(c => {
+    const answerDate = dayjs(c["回答日時"]);
+    if (answerDate < fromDate || answerDate > toDate ) {
+      return false;
+    }
+
     for (const key of keys) {
       if (key[1].length != 0) {
         if (!key[1].includes(c[key[0]])) {
@@ -233,6 +241,33 @@ for (const sel of sels) {
   s.dataname = sel;
   s.onchange = show;
 }
+
+const createDateInputElement = (option) => {
+  const box = cr("span");
+  box.style.display = "inline-block";
+  const txt = cr("span");
+  txt.textContent = option["title"];
+  box.appendChild(txt);
+  box.appendChild(cr("br"));
+  const dateInputElement = cr("input");
+  dateInputElement.setAttribute("id", option["elementId"]);
+  dateInputElement.setAttribute("type", "date");
+  dateInputElement.value = option["date"];
+  dateInputElement.onchange = show;
+  box.appendChild(dateInputElement);
+  divsels.appendChild(box);
+}
+
+createDateInputElement({
+  title: "開始日",
+  elementId: "fromDate",
+  date: dayjs().subtract(1, "months").format("YYYY-MM-DD")
+});
+createDateInputElement({
+  title: "終了日",
+  elementId: "toDate",
+  date: dayjs().format("YYYY-MM-DD")
+});
 
 show();
 
