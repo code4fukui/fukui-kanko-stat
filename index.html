@@ -214,6 +214,61 @@ const show = () => {
   };
 };
 
+const addElementToBox = (box, sel) => {
+  switch (sel) {
+    case "都道府県":
+      const input = box.querySelectorAll("select")[0];
+
+      const allButton = document.createElement("button");
+      allButton.textContent = "全国";
+      allButton.onclick = (event) => {
+        input.querySelectorAll("option").forEach(o => {
+          o.selected = false;
+        });
+        input.dispatchEvent(new Event("change"));
+      };
+      
+      const inButton = document.createElement("button");
+      inButton.textContent = "福井県内";
+      inButton.onclick = (event) => {
+        input.querySelectorAll("option").forEach(o => {
+          if (o.value == "福井県") {
+            o.selected = true;
+            return;
+          }
+
+          o.selected = false;
+        });
+        input.dispatchEvent(new Event("change"));
+      };
+      
+      const outButton = document.createElement("button");
+      outButton.textContent = "福井県外";
+      outButton.onclick = () => {
+        input.querySelectorAll("option").forEach(o => {
+          if (o.value == "福井県" || !o.value) {
+            o.selected = false;
+            return;
+          }
+
+          o.selected = true;
+        });
+        input.dispatchEvent(new Event("change"));
+      };
+      
+      box.appendChild(document.createElement("br"))
+      box.appendChild(allButton);
+      box.appendChild(document.createElement("br"))
+      box.appendChild(inButton);
+      box.appendChild(document.createElement("br"))
+      box.appendChild(outButton);
+      break;
+
+    default:
+      break;
+  }
+};
+
 const cr = (tag) => document.createElement(tag);
 
 const sels = Object.keys(charts);
@@ -237,6 +292,7 @@ for (const sel of sels) {
     s.appendChild(opt);
   });
   box.appendChild(s);
+  addElementToBox(box, sel);
   divsels.appendChild(box);
   s.dataname = sel;
   s.onchange = show;
