@@ -4,6 +4,7 @@
 </head><body>
 <h1 id=title></h1>
 
+<div id=prefbox></div>
 <div id=divsels></div>
 <div id=divpie></div>
 <hr>
@@ -214,10 +215,10 @@ const show = () => {
   };
 };
 
-const addElementToBox = (box, sel) => {
+const addElementToBox = (box, sel, parent) => {
   switch (sel) {
     case "都道府県":
-      const input = box.querySelectorAll("select")[0];
+      const input = parent.querySelectorAll("select")[0];
 
       const allButton = document.createElement("button");
       allButton.textContent = "全国";
@@ -225,7 +226,9 @@ const addElementToBox = (box, sel) => {
         input.querySelectorAll("option").forEach(o => {
           o.selected = false;
         });
-        input.dispatchEvent(new Event("change"));
+        //input.dispatchEvent(new Event("change"));
+        console.log(input)
+        input.onchange();
       };
       
       const inButton = document.createElement("button");
@@ -256,11 +259,8 @@ const addElementToBox = (box, sel) => {
         input.dispatchEvent(new Event("change"));
       };
       
-      box.appendChild(document.createElement("br"))
       box.appendChild(allButton);
-      box.appendChild(document.createElement("br"))
       box.appendChild(inButton);
-      box.appendChild(document.createElement("br"))
       box.appendChild(outButton);
       break;
 
@@ -292,7 +292,7 @@ for (const sel of sels) {
     s.appendChild(opt);
   });
   box.appendChild(s);
-  addElementToBox(box, sel);
+  addElementToBox(prefbox, sel, box);
   divsels.appendChild(box);
   s.dataname = sel;
   s.onchange = show;
@@ -313,6 +313,8 @@ const createDateInputElement = (option) => {
   box.appendChild(dateInputElement);
   divsels.appendChild(box);
 }
+
+divsels.appendChild(cr("br"));
 
 createDateInputElement({
   title: "開始日",
@@ -340,6 +342,9 @@ textarea {
 }
 #divsels {
   margin-bottom: .5em;
+}
+#prefbox > * {
+  margin: .5em .2em;
 }
 </style>
 
