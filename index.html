@@ -9,7 +9,7 @@
 <div id=divpie></div>
 <hr>
 <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
- (<a href=https://github.com/code4fukui/fukui-kanko-survey/>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+ (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
 
 <script type="module">
 import { ChartPie } from "./ChartPie.js";
@@ -226,8 +226,6 @@ const addElementToBox = (box, sel, parent) => {
         input.querySelectorAll("option").forEach(o => {
           o.selected = false;
         });
-        //input.dispatchEvent(new Event("change"));
-        console.log(input)
         input.onchange();
       };
       
@@ -242,7 +240,7 @@ const addElementToBox = (box, sel, parent) => {
 
           o.selected = false;
         });
-        input.dispatchEvent(new Event("change"));
+        input.onchange();
       };
       
       const outButton = document.createElement("button");
@@ -256,7 +254,7 @@ const addElementToBox = (box, sel, parent) => {
 
           o.selected = true;
         });
-        input.dispatchEvent(new Event("change"));
+        input.onchange();
       };
       
       box.appendChild(allButton);
