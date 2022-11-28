@@ -227,7 +227,7 @@ const processData = (key, data) => {
   }
 };
 
-const sortSelectOptions = (name, options) => {
+const sortSelectCodes = (name, codes) => {
   switch(name) {
     case "都道府県":
     case "年代":
@@ -236,12 +236,12 @@ const sortSelectOptions = (name, options) => {
     case "満足度":
     case "不便さ":
     case "今後の来訪意向":
-      return options.sort((o1, o2) => {
-        if (charts[name]["selectCode"][o1] < charts[name]["selectCode"][o2]) {
+      return codes.sort((c1, c2) => {
+        if (charts[name]["selectCode"][c1] < charts[name]["selectCode"][c2]) {
           return -1;
         }
         
-        if (charts[name]["selectCode"][o1] > charts[name]["selectCode"][o2]) {
+        if (charts[name]["selectCode"][c1] > charts[name]["selectCode"][c2]) {
           return 1;
         }
 
@@ -250,12 +250,12 @@ const sortSelectOptions = (name, options) => {
 
     case "6分類":
     case "同行者":
-      return Object.keys(charts[name]["selectCode"]).sort((o1, o2) => {
-        if (charts[name]["selectCode"][o1] < charts[name]["selectCode"][o2]) {
+      return Object.keys(charts[name]["selectCode"]).sort((c1, c2) => {
+        if (charts[name]["selectCode"][c1] < charts[name]["selectCode"][c2]) {
           return -1;
         }
         
-        if (charts[name]["selectCode"][o1] > charts[name]["selectCode"][o2]) {
+        if (charts[name]["selectCode"][c1] > charts[name]["selectCode"][c2]) {
           return 1;
         }
 
@@ -263,9 +263,9 @@ const sortSelectOptions = (name, options) => {
       });
 
     case "回答月":
-      return options.sort((o1, o2) => {
-        const n1 = Number(o1.slice(-1));
-        const n2 = Number(o2.slice(-1));
+      return codes.sort((c1, c2) => {
+        const n1 = Number(c1.slice(-1));
+        const n2 = Number(c2.slice(-1));
 
         if (n1 < n2) {
           return -1;
@@ -279,9 +279,9 @@ const sortSelectOptions = (name, options) => {
       });
 
     case "NPS":
-      return options.sort((o1, o2) => {
-        const n1 = Number(o1);
-        const n2 = Number(o2);
+      return codes.sort((c1, c2) => {
+        const n1 = Number(c1);
+        const n2 = Number(c2);
 
         if (n1 < n2) {
           return 1;
@@ -298,11 +298,11 @@ const sortSelectOptions = (name, options) => {
       break;
   }
 
-  return options.sort();
+  return codes.sort();
 };
 
-const sort = (obj) => {
-  const names = Object.keys(obj).sort();
+const sortData = (key, obj) => {
+  const names = sortSelectCodes(key, Object.keys(obj));
   const res = {};
   for (const name of names) {
     res[name] = obj[name];
@@ -389,10 +389,10 @@ const show = () => {
           data[v]++;
         }
       }
-      const data2 = sort(data);
-      const chartPie = new ChartPie(data);
+      const data2 = sortData(name, data);
+      const chartPie = new ChartPie(data2);
       chartPie.id = "chart-pie" + index;
-      const chartBar = new ChartBar(data);
+      const chartBar = new ChartBar(data2);
       chartBar.id = "chart-bar" + index;
       const div2 = document.createElement("div");
       div2.style.display = "inline-block";
@@ -507,7 +507,7 @@ for (const sel of sels) {
   const s = cr("select");
   s.setAttribute("multiple", true);
   s.appendChild(cr("option"));
-  const names = sortSelectOptions(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
+  const names = sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
   names.forEach(name => {
     if (!name) {
       return;
