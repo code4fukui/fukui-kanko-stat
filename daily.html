@@ -1,59 +1,62 @@
 
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-
-<h1>福井県観光アンケート回答数推移（日別）</h1>
-<div>アンケート回答総数 <span id=sum></span>件 (<span id=lastdate></span> 現在)</div>
-<div id=main></div>
-<a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
- (<a href=https://github.com/code4fukui/fukui-kanko-survey/>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
-
-<script type="module">
-import { ChartLine } from "https://js.sabae.cc/Chart.js";
-import { CSV } from "https://js.sabae.cc/CSV.js";
-import { Day } from "https://js.sabae.cc/DateTime.js";
-import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-import {} from "./header.js";
-
-const makeDailyCount = (data, datelabel) => {
-  //console.log(data);
-  const dates = data.map(d => new Day(d[datelabel])).sort();
-  const st = dates[0];
-  const end = dates[dates.length - 1];
-  //console.log(st, end);
-  const res = [];
-  for (let d = st; !d.isAfter(end); d = d.nextDay()) {
-    //console.log(d.toString());
-    res.push({ name: d.toStringYMD(), value: 0 });
-  }
-  for (const d of dates) {
-    const r = res.find(r => r.name == d.toStringYMD());
-    r.value++;
-  }
-  res.filter(r => r.name = parseInt(r.name.substring(4, 6)) + "/" + parseInt(r.name.substring(6)));
-  console.log(res)
-  return res;
-};
-
-const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-const data = CSV.toJSON(await CSV.fetch(url));
-
-const data2 = makeDailyCount(data, "回答日時");
-sum.textContent = data2.reduce((prev, d) => prev + d.value, 0);
-lastdate.textContent = data2[data2.length - 1].name;
-
-const chart = new ChartLine(data2, { useMinValue: false });
-main.appendChild(chart);
-
-document.title = document.body.querySelector("h1").textContent;
-</script>
-
-<style>
-body {
-  margin: 0;
-  text-align: center;
-}
-chart-line {
-  width: 95vw;
-  height: 80vh;
-}
-</style>
+  
+  <h1>福井県観光アンケート回答数推移（日別）</h1>
+  <div>アンケート回答総数 <span id=sum></span>件 (<span id=lastdate></span> 現在)</div>
+  <div id=main></div>
+  <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
+  (<a href=https://github.com/code4fukui/fukui-kanko-survey/>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+  
+  <script type="module">
+    import { ChartLine } from "https://js.sabae.cc/Chart.js";
+    import { CSV } from "https://js.sabae.cc/CSV.js";
+    import { Day } from "https://js.sabae.cc/DateTime.js";
+    import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+    import {} from "./header.js";
+    
+    addEventListener("load", async () => {
+      const makeDailyCount = (data, datelabel) => {
+        //console.log(data);
+        const dates = data.map(d => new Day(d[datelabel])).sort();
+        const st = dates[0];
+        const end = dates[dates.length - 1];
+        //console.log(st, end);
+        const res = [];
+        for (let d = st; !d.isAfter(end); d = d.nextDay()) {
+          //console.log(d.toString());
+          res.push({ name: d.toStringYMD(), value: 0 });
+        }
+        for (const d of dates) {
+          const r = res.find(r => r.name == d.toStringYMD());
+          r.value++;
+        }
+        res.filter(r => r.name = parseInt(r.name.substring(4, 6)) + "/" + parseInt(r.name.substring(6)));
+        console.log(res)
+        return res;
+      };
+      
+      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+      const data = CSV.toJSON(await CSV.fetch(url));
+      
+      const data2 = makeDailyCount(data, "回答日時");
+      sum.textContent = data2.reduce((prev, d) => prev + d.value, 0);
+      lastdate.textContent = data2[data2.length - 1].name;
+      
+      const chart = new ChartLine(data2, { useMinValue: false });
+      main.appendChild(chart);
+      
+      document.title = document.body.querySelector("h1").textContent;
+    });
+  </script>
+  
+  <style>
+    body {
+      margin: 0;
+      text-align: center;
+    }
+    chart-line {
+      width: 95vw;
+      height: 80vh;
+    }
+  </style>
+  

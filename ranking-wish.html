@@ -1,187 +1,189 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>福井県観光リピート意向ランキング（データ出典：福井県観光連盟 福井県観光アンケートオープンデータ）</title>
-<meta name="twitter:card" content="summary_large_image">
-<!--
-<meta property="og:image"  x-content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
-<meta name="twitter:image" x-content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
--->
-
+  <title>福井県観光リピート意向ランキング（データ出典：福井県観光連盟 福井県観光アンケートオープンデータ）</title>
+  <meta name="twitter:card" content="summary_large_image">
+  <!--
+    <meta property="og:image"  x-content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
+    <meta name="twitter:image" x-content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
+  -->
+  
 </head><body>
-<header>
-  <h1 id=title></h1>
-  <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html></a>
-</header>
-
-<main>
-<div id=opt>
-  <select id=selpref><option value="">すべての都道府県</option><option value="without">福井県外</option><select>
-  <input id=mincount value="3" size=3 type="text">件以上のみ有効
-  <span>合計<span id=spansum>-</span>件 (また行きたい(1年以内) と回答した率で算出)
-</div>
-
-<div id=main></div>
-</main>
-
-<div id=credit>
-  <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
-  <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
-  <qr-code></qr-code><br>
-</div>
-
-<script type="module">
-import { CSV } from "https://js.sabae.cc/CSV.js";
-import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-import { ChartPie } from "https://js.sabae.cc/Chart.js";
-import { JAPAN_PREF } from "https://js.sabae.cc/JAPAN_PREF.js";
-import {} from "./header.js";
-
-const st = document.title;
-title.textContent = st.substring(0, st.indexOf("（"));
-subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
-
-const nshow = 1000;
-
-const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-const data = CSV.toJSON(await CSV.fetch(url));
-const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
-
-for (const p of JAPAN_PREF) {
-  const opt = document.createElement("option");
-  opt.textContent = p;
-  selpref.appendChild(opt);
-}
-
-const getPoint = (area) => {
-  let p = 0;
-  let cnt = 0;
-  for (const d of data) {
-    if (d.回答エリア2 != area) {
-      continue;
-    }
-    const pref = selpref.value;
-    if (pref == "without") {
-      if (d.都道府県 == "福井県") {
-        continue;
-      }
-    } else if (pref != "" && d.都道府県 != pref) {
-      continue;
-    }
+  <header>
+    <h1 id=title></h1>
+    <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html></a>
+  </header>
+  
+  <main>
+    <div id=opt>
+      <select id=selpref><option value="">すべての都道府県</option><option value="without">福井県外</option><select>
+        <input id=mincount value="3" size=3 type="text">件以上のみ有効
+        <span>合計<span id=spansum>-</span>件 (また行きたい(1年以内) と回答した率で算出)
+      </div>
+      
+      <div id=main></div>
+    </main>
     
-    const ngoodbad = d.今後の来訪意向 == "また行きたい（1年以内）";
-    p += ngoodbad;
-    cnt++;
-  }
-  const idx = parseInt(area);
-  const name = area.substring(area.indexOf(".") + 1)
-  const s = `<a target=_blank href=comment-wish.html#${idx},${selpref.value == "without" ? 1 : 0}>${name}</a>`;
-  return { average: (p / cnt * 100).toFixed(1), count: cnt, area: s };
-};
-
-const show = () => {
-  location.hash = selpref.selectedIndex + "," + mincount.value;
-  main.innerHTML = "";
-  const spot = [];
-  const min = parseInt(mincount.value) || 1;
-  let sum = 0;
-  for (const area of areas) {
-    const p = getPoint(area);
-    if (p.count && p.count >= min) {
-      spot.push(p);
-      sum += p.count;
-    }
-  }
-  spansum.textContent = sum;
-  spot.sort((a, b) => b.average - a.average);
-  const s = [];
-  for (let i = 0; i < spot.length; i++) {
-    const d = spot[i];
-    s.push(`<div class='comment'><span class=rank>${i + 1}位</span> <span class=point>${d.average}%</span>(<span class=count>${d.count}</span>件) <span class=area>${d.area}</span></div>`);
-  }
-  /*
-  const chart = new ChartPie(sumgoodbad);
-  main.appendChild(chart);
-  */
-  const div = document.createElement("div");
-  div.innerHTML = s.join("\n");
-  main.appendChild(div);
-};
-if (location.hash.length > 1) {
-  const [sel, cnt] = location.hash.substring(1).split(",");
-  if (sel) {
-    selpref.selectedIndex = sel || 1;
-    mincount.value = cnt || 3;
-  }
-} else {
-  selpref.selectedIndex = 1;
-}
-show();
-
-mincount.onchange = selpref.onchange = () => show();
-
-</script>
-
-<style>
-body {
-  font-family: sans-serif;
-}
-header {
-  margin: 1em;
-}
-h1 {
-  text-align: center;
-  padding: 0;
-  margin: 0;
-}
-#subtitle {
-  display: block;
-  text-align: center;
-  font-weight: bold;
-  text-decoration: none;
-}
-.comment {
-  font-size: 120%;
-  font-weight: bold;
-}
-.good {
-  color: rgb(61, 99, 250);
-}
-.bad {
-  color: red;
-}
-.notbad {
-  color: rgb(155, 155, 22);
-}
-#qr {
-  text-align: center;
-}
-#qr {
-  margin-bottom: 2em;
-}
-#main {
-  text-align: center;
-  border: 3px solid #555;
-  padding: .5em;
-}
-.rank {
-  font-size: 200%;
-  font-weight: bold;
-}
-.point {
-  font-size: 150%;
-}
-.area {
-  font-size: 150%;
-}
-#main div {
-  text-align: left;
-}
-input, label, select {
-  font-size: 14px;
-}
-#credit {
-  text-align: center;
-}
-</style>
-
-</body>
-</html>
+    <div id=credit>
+      <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
+      <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
+      <qr-code></qr-code><br>
+    </div>
+    
+    <script type="module">
+      import { CSV } from "https://js.sabae.cc/CSV.js";
+      import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+      import { ChartPie } from "https://js.sabae.cc/Chart.js";
+      import { JAPAN_PREF } from "https://js.sabae.cc/JAPAN_PREF.js";
+      import {} from "./header.js";
+      
+      addEventListener("load", async () => {
+        const st = document.title;
+        title.textContent = st.substring(0, st.indexOf("（"));
+        subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
+        
+        const nshow = 1000;
+        
+        const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+        const data = CSV.toJSON(await CSV.fetch(url));
+        const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
+        
+        for (const p of JAPAN_PREF) {
+          const opt = document.createElement("option");
+          opt.textContent = p;
+          selpref.appendChild(opt);
+        }
+        
+        const getPoint = (area) => {
+          let p = 0;
+          let cnt = 0;
+          for (const d of data) {
+            if (d.回答エリア2 != area) {
+              continue;
+            }
+            const pref = selpref.value;
+            if (pref == "without") {
+              if (d.都道府県 == "福井県") {
+                continue;
+              }
+            } else if (pref != "" && d.都道府県 != pref) {
+              continue;
+            }
+            
+            const ngoodbad = d.今後の来訪意向 == "また行きたい（1年以内）";
+            p += ngoodbad;
+            cnt++;
+          }
+          const idx = parseInt(area);
+          const name = area.substring(area.indexOf(".") + 1)
+          const s = `<a target=_blank href=comment-wish.html#${idx},${selpref.value == "without" ? 1 : 0}>${name}</a>`;
+          return { average: (p / cnt * 100).toFixed(1), count: cnt, area: s };
+        };
+        
+        const show = () => {
+          location.hash = selpref.selectedIndex + "," + mincount.value;
+          main.innerHTML = "";
+          const spot = [];
+          const min = parseInt(mincount.value) || 1;
+          let sum = 0;
+          for (const area of areas) {
+            const p = getPoint(area);
+            if (p.count && p.count >= min) {
+              spot.push(p);
+              sum += p.count;
+            }
+          }
+          spansum.textContent = sum;
+          spot.sort((a, b) => b.average - a.average);
+          const s = [];
+          for (let i = 0; i < spot.length; i++) {
+            const d = spot[i];
+            s.push(`<div class='comment'><span class=rank>${i + 1}位</span> <span class=point>${d.average}%</span>(<span class=count>${d.count}</span>件) <span class=area>${d.area}</span></div>`);
+          }
+          /*
+          const chart = new ChartPie(sumgoodbad);
+          main.appendChild(chart);
+          */
+          const div = document.createElement("div");
+          div.innerHTML = s.join("\n");
+          main.appendChild(div);
+        };
+        if (location.hash.length > 1) {
+          const [sel, cnt] = location.hash.substring(1).split(",");
+          if (sel) {
+            selpref.selectedIndex = sel || 1;
+            mincount.value = cnt || 3;
+          }
+        } else {
+          selpref.selectedIndex = 1;
+        }
+        show();
+        
+        mincount.onchange = selpref.onchange = () => show();
+      });
+    </script>
+    
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      header {
+        margin: 1em;
+      }
+      h1 {
+        text-align: center;
+        padding: 0;
+        margin: 0;
+      }
+      #subtitle {
+        display: block;
+        text-align: center;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .comment {
+        font-size: 120%;
+        font-weight: bold;
+      }
+      .good {
+        color: rgb(61, 99, 250);
+      }
+      .bad {
+        color: red;
+      }
+      .notbad {
+        color: rgb(155, 155, 22);
+      }
+      #qr {
+        text-align: center;
+      }
+      #qr {
+        margin-bottom: 2em;
+      }
+      #main {
+        text-align: center;
+        border: 3px solid #555;
+        padding: .5em;
+      }
+      .rank {
+        font-size: 200%;
+        font-weight: bold;
+      }
+      .point {
+        font-size: 150%;
+      }
+      .area {
+        font-size: 150%;
+      }
+      #main div {
+        text-align: left;
+      }
+      input, label, select {
+        font-size: 14px;
+      }
+      #credit {
+        text-align: center;
+      }
+    </style>
+    
+  </body>
+  </html>
+  
