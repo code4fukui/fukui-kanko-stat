@@ -1,185 +1,186 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>福井県観光アンケート コメント新着順（データ出典：福井県観光連盟）</title>
-<meta name="twitter:card" content="summary_large_image">
-<meta property="og:image"  content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
-<meta name="twitter:image" content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
-
+  <title>福井県観光アンケート コメント新着順（データ出典：福井県観光連盟）</title>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:image"  content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
+  <meta name="twitter:image" content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
+  
 </head><body>
-<header>
-  <h1 id=title></h1>
-  <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html></a>
-</header>
-
-<script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
-<div id=qr>
-  <select id=selarea><option>すべてのエリア</option></select>
-  <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
-  <select id=selage><option>すべての年代</option></select>
-</div>
-
-<main id=main></main>
-
-<div id=credit>
-  <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
-  <qr-code></qr-code><br>
-</div>
-
-<script type="module">
-import { CSV } from "https://js.sabae.cc/CSV.js";
-import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-import { ChartPie } from "https://js.sabae.cc/Chart.js";
-import {} from "./header.js";
-
-const st = document.title;
-title.textContent = st.substring(0, st.indexOf("（"));
-subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
-
-const nshow = 1000;
-
-//const url = "./fukui-answer.csv";
-const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-const data = CSV.toJSON(await CSV.fetch(url));
-data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
-const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
-areas.forEach(a => {
-  const opt = document.createElement("option");
-  opt.textContent = a;
-  selarea.appendChild(opt);
-});
-const getArea = () => {
-  const v = selarea.value;
-  return v == "すべてのエリア" ? 0 : parseInt(v);
-};
-
-const ageopt = ["10歳未満", "10代", "20代", "30代", "40代", "50代", "60代", "70代", "80歳以上"];
-for (const age of ageopt) {
-  const opt = document.createElement("option");
-  opt.textContent = age;
-  selage.appendChild(opt);
-}
-
-const show = () => {
-  location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
-  main.innerHTML = "";
-  const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
-  let cnt = 0;
-  const s = [];
-  const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
-  const sumgoodbad = sgoodbad.map(s => {
-    return { name: s, value: 0 };
-  });
-  for (let i = 0; i < data.length; i++) {
-    const d = data[i];
-    if (chkwithout.checked && d.都道府県 == "福井県") {
-      continue;
-    }
-    const filterarea = selarea.value != "すべてのエリア";
-    if (filterarea && d.回答エリア2 != selarea.value) {
-      continue;
-    }
-    const filterage = selage.value != "すべての年代";
-    if (filterage && d.年代 != selage.value) {
-      continue;
-    }
-
-    const ngoodbad = sgoodbad.indexOf(d.満足度);
-    sumgoodbad[ngoodbad].value++;
-
-    const comment = d.満足度の理由;
-    if (!comment) {
-      continue;
-    }
-    const goodbad = ["good", "good", "notbad", "bad", "bad"][ngoodbad];
-    s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
-    for (const n of names) {
-      if (filterarea && n == "回答エリア2") {
-        continue;
+  <header>
+    <h1 id=title></h1>
+    <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html></a>
+  </header>
+  
+  <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
+  <div id=qr>
+    <select id=selarea><option>すべてのエリア</option></select>
+    <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
+    <select id=selage><option>すべての年代</option></select>
+  </div>
+  
+  <main id=main></main>
+  
+  <div id=credit>
+    <a href=https://github.com/code4fukui/fukui-kanko-stat>src on GitHub</a><br>
+    <qr-code></qr-code><br>
+  </div>
+  
+  <script type="module">
+    import { CSV } from "https://js.sabae.cc/CSV.js";
+    import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+    import { ChartPie } from "https://js.sabae.cc/Chart.js";
+    import {} from "./header.js";
+    
+    addEventListener("load", async () => {
+      const st = document.title;
+      title.textContent = st.substring(0, st.indexOf("（"));
+      subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
+      
+      const nshow = 1000;
+      
+      //const url = "./fukui-answer.csv";
+      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+      const data = CSV.toJSON(await CSV.fetch(url));
+      data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
+      const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
+      areas.forEach(a => {
+        const opt = document.createElement("option");
+        opt.textContent = a;
+        selarea.appendChild(opt);
+      });
+      const getArea = () => {
+        const v = selarea.value;
+        return v == "すべてのエリア" ? 0 : parseInt(v);
+      };
+      
+      const ageopt = ["10歳未満", "10代", "20代", "30代", "40代", "50代", "60代", "70代", "80歳以上"];
+      for (const age of ageopt) {
+        const opt = document.createElement("option");
+        opt.textContent = age;
+        selage.appendChild(opt);
       }
-      if (n == "会員ID") {
-        s.push(`${n}: <a href=detail.html#id=${d[n]}>${d[n]}</a>`);
-      } else {
-        s.push(`${n}: ${d[n]}`);
+      
+      const show = () => {
+        location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
+        main.innerHTML = "";
+        const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
+        let cnt = 0;
+        const s = [];
+        const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
+        const sumgoodbad = sgoodbad.map(s => {
+          return { name: s, value: 0 };
+        });
+        for (let i = 0; i < data.length; i++) {
+          const d = data[i];
+          if (chkwithout.checked && d.都道府県 == "福井県") {
+            continue;
+          }
+          const filterarea = selarea.value != "すべてのエリア";
+          if (filterarea && d.回答エリア2 != selarea.value) {
+            continue;
+          }
+          const filterage = selage.value != "すべての年代";
+          if (filterage && d.年代 != selage.value) {
+            continue;
+          }
+          
+          const ngoodbad = sgoodbad.indexOf(d.満足度);
+          sumgoodbad[ngoodbad].value++;
+          
+          const comment = d.満足度の理由;
+          if (!comment) {
+            continue;
+          }
+          const goodbad = ["good", "good", "notbad", "bad", "bad"][ngoodbad];
+          s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
+          for (const n of names) {
+            if (filterarea && n == "回答エリア2") {
+              continue;
+            }
+            if (n == "会員ID") {
+              s.push(`${n}: <a href=detail.html#id=${d[n]}>${d[n]}</a>`);
+            } else {
+              s.push(`${n}: ${d[n]}`);
+            }
+          }
+          s.push("<hr>");
+          if (cnt++ == nshow) {
+            break;
+          }
+        }
+        const chart = new ChartPie(sumgoodbad);
+        main.appendChild(chart);
+        const div = document.createElement("div");
+        div.innerHTML = s.join("\n");
+        main.appendChild(div);
+      };
+      if (location.hash.length > 1) {
+        const [narea, chk, nage] = location.hash.substring(1).split(",");
+        if (narea) {
+          selarea.selectedIndex = narea;
+        }
+        if (chk) {
+          chkwithout.checked = chk == "1";
+        }
+        if (nage) {
+          selage.selectedIndex = nage;
+        }
       }
+      show();
+      
+      selage.onchange = selarea.onchange = chkwithout.onchange = () => show();
+    });
+  </script>
+  
+  <style>
+    body {
+      font-family: sans-serif;
     }
-    s.push("<hr>");
-    if (cnt++ == nshow) {
-      break;
+    header {
+      margin: 1em;
     }
-  }
-  const chart = new ChartPie(sumgoodbad);
-  main.appendChild(chart);
-  const div = document.createElement("div");
-  div.innerHTML = s.join("\n");
-  main.appendChild(div);
-};
-if (location.hash.length > 1) {
-  const [narea, chk, nage] = location.hash.substring(1).split(",");
-  if (narea) {
-    selarea.selectedIndex = narea;
-  }
-  if (chk) {
-    chkwithout.checked = chk == "1";
-  }
-  if (nage) {
-    selage.selectedIndex = nage;
-  }
-}
-show();
-
-selage.onchange = selarea.onchange = chkwithout.onchange = () => show();
-
-</script>
-
-<style>
-body {
-  font-family: sans-serif;
-}
-header {
-  margin: 1em;
-}
-h1 {
-  text-align: center;
-  padding: 0;
-  margin: 0;
-}
-#subtitle {
-  display: block;
-  text-align: center;
-  font-weight: bold;
-  text-decoration: none;
-}
-.comment {
-  font-size: 120%;
-  font-weight: bold;
-}
-.good {
-  color: rgb(61, 99, 250);
-}
-.bad {
-  color: red;
-}
-.notbad {
-  color: rgb(155, 155, 22);
-}
-#qr {
-  text-align: center;
-}
-#qr {
-  margin-bottom: 2em;
-}
-#main {
-  text-align: center;
-}
-#main div {
-  text-align: left;
-}
-input, label, select {
-  font-size: 14px;
-}
-#credit {
-  text-align: center;
-}
-</style>
-
+    h1 {
+      text-align: center;
+      padding: 0;
+      margin: 0;
+    }
+    #subtitle {
+      display: block;
+      text-align: center;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .comment {
+      font-size: 120%;
+      font-weight: bold;
+    }
+    .good {
+      color: rgb(61, 99, 250);
+    }
+    .bad {
+      color: red;
+    }
+    .notbad {
+      color: rgb(155, 155, 22);
+    }
+    #qr {
+      text-align: center;
+    }
+    #qr {
+      margin-bottom: 2em;
+    }
+    #main {
+      text-align: center;
+    }
+    #main div {
+      text-align: left;
+    }
+    input, label, select {
+      font-size: 14px;
+    }
+    #credit {
+      text-align: center;
+    }
+  </style>
+  
 </body>
 </html>
