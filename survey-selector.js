@@ -230,7 +230,59 @@ class SurveySelector {
     return codes.sort();
   };
   
-  static createSelectElement(divsels, csv, show, addElementToBox) {
+  static createSelectElement(divsels, csv, show, beginDate, endDate) {
+    const addElementToBox = (box, sel, parent) => {
+      switch (sel) {
+        case "都道府県":
+        const input = parent.querySelectorAll("select")[0];
+        
+        const allButton = document.createElement("button");
+        allButton.textContent = "全国";
+        allButton.onclick = (event) => {
+          input.querySelectorAll("option").forEach(o => {
+            o.selected = false;
+          });
+          input.onchange();
+        };
+        
+        const inButton = document.createElement("button");
+        inButton.textContent = "福井県内";
+        inButton.onclick = (event) => {
+          input.querySelectorAll("option").forEach(o => {
+            if (o.value == "福井県") {
+              o.selected = true;
+              return;
+            }
+            
+            o.selected = false;
+          });
+          input.onchange();
+        };
+        
+        const outButton = document.createElement("button");
+        outButton.textContent = "福井県外";
+        outButton.onclick = () => {
+          input.querySelectorAll("option").forEach(o => {
+            if (o.value == "福井県" || !o.value) {
+              o.selected = false;
+              return;
+            }
+            
+            o.selected = true;
+          });
+          input.onchange();
+        };
+        
+        box.appendChild(allButton);
+        box.appendChild(inButton);
+        box.appendChild(outButton);
+        break;
+        
+        default:
+        break;
+      }
+    };
+
     const sels = Object.keys(SurveySelector.surveys);
     for (const sel of sels) {
       const box = document.createElement("span");
@@ -257,6 +309,78 @@ class SurveySelector {
       s.dataname = sel;
       s.onchange = show;
     }
+
+    const createDateInputElement = (option) => {
+      const box = document.createElement("span");
+      box.style.display = "inline-block";
+      const txt = document.createElement("span");
+      txt.textContent = option["title"];
+      box.appendChild(txt);
+      box.appendChild(document.createElement("br"));
+      const dateInputElement = document.createElement("input");
+      dateInputElement.setAttribute("id", option["elementId"]);
+      dateInputElement.setAttribute("type", "date");
+      dateInputElement.value = option["date"];
+      dateInputElement.onchange = show;
+      box.appendChild(dateInputElement);
+      divsels.appendChild(box);
+    }
+    
+    divsels.appendChild(document.createElement("br"));
+    
+    const begin = !beginDate ? dayjs().subtract(1, "months") : dayjs(beginDate);
+    const end = !endDate ? dayjs() : dayjs(endDate);
+    createDateInputElement({
+      title: "開始日",
+      elementId: "fromDate",
+      date: begin.format("YYYY-MM-DD")
+    });
+    createDateInputElement({
+      title: "終了日",
+      elementId: "toDate",
+      date: end.format("YYYY-MM-DD")
+    });
+  }
+
+  static filter(csv) {
+    const node2array = (nodes) => {
+      const res = [];
+      for (const n of nodes) {
+        res.push(n);
+      }
+      return res;
+    };
+
+    const generateKeys = (selectedOptions) => {
+      const keys = [];
+      for (let i = 0; i < selectedOptions.length; i++) {
+        keys.push(selectedOptions[i].value);
+      }
+      // 空要素は削除
+      return keys.filter(Boolean);
+    };
+
+    const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
+    const fromDate = dayjs(document.getElementById("fromDate").value);
+    const toDate = dayjs(document.getElementById("toDate").value);
+
+    return csv.filter(c => {
+      const answerDate = dayjs(c["回答日時"]);
+      if (answerDate < fromDate || answerDate > toDate ) {
+        return false;
+      }
+      
+      for (const key of keys) {
+        if (key[1].length != 0) {
+          processData(key[0], c);
+          if (!key[1].includes(c[key[0]])) {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    });
   }
 }
 

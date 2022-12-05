@@ -140,46 +140,8 @@
       
       const show = () => {
         divpie.innerHTML = "";
-        
         console.log(divsels.querySelectorAll("select"));
-        const node2array = (nodes) => {
-          const res = [];
-          for (const n of nodes) {
-            res.push(n);
-          }
-          return res;
-        };
-        
-        const generateKeys = (selectedOptions) => {
-          const keys = [];
-          for (let i = 0; i < selectedOptions.length; i++) {
-            keys.push(selectedOptions[i].value);
-          }
-          // 空要素は削除
-          return keys.filter(Boolean);
-        }
-        
-        const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-        const fromDate = dayjs(document.getElementById("fromDate").value);
-        const toDate = dayjs(document.getElementById("toDate").value);
-        
-        const csv2 = csv.filter(c => {
-          const answerDate = dayjs(c["回答日時"]);
-          if (answerDate < fromDate || answerDate > toDate ) {
-            return false;
-          }
-          
-          for (const key of keys) {
-            if (key[1].length != 0) {
-              processData(key[0], c);
-              if (!key[1].includes(c[key[0]])) {
-                return false;
-              }
-            }
-          }
-          
-          return true;
-        });
+        const csv2 = SurveySelector.filter(csv);
         
         if (csv2.length) {
           const names = Object.keys(charts);
@@ -206,7 +168,7 @@
             const chartSelect = document.createElement("select");
             chartSelect.onchange = onChangeChartSelect.bind(null, name, index);
             for (const key in chartType) {
-              const opt = cr("option");
+              const opt = document.createElement("option");
               opt.textContent = chartType[key];
               if (charts[name]["type"] == chartType[key]) {
                 opt.selected = true;
@@ -247,91 +209,7 @@
         };
       };
       
-      const addElementToBox = (box, sel, parent) => {
-        switch (sel) {
-          case "都道府県":
-          const input = parent.querySelectorAll("select")[0];
-          
-          const allButton = document.createElement("button");
-          allButton.textContent = "全国";
-          allButton.onclick = (event) => {
-            input.querySelectorAll("option").forEach(o => {
-              o.selected = false;
-            });
-            input.onchange();
-          };
-          
-          const inButton = document.createElement("button");
-          inButton.textContent = "福井県内";
-          inButton.onclick = (event) => {
-            input.querySelectorAll("option").forEach(o => {
-              if (o.value == "福井県") {
-                o.selected = true;
-                return;
-              }
-              
-              o.selected = false;
-            });
-            input.onchange();
-          };
-          
-          const outButton = document.createElement("button");
-          outButton.textContent = "福井県外";
-          outButton.onclick = () => {
-            input.querySelectorAll("option").forEach(o => {
-              if (o.value == "福井県" || !o.value) {
-                o.selected = false;
-                return;
-              }
-              
-              o.selected = true;
-            });
-            input.onchange();
-          };
-          
-          box.appendChild(allButton);
-          box.appendChild(inButton);
-          box.appendChild(outButton);
-          break;
-          
-          default:
-          break;
-        }
-      };
-      
-      const cr = (tag) => document.createElement(tag);
-      
-      SurveySelector.createSelectElement(divsels, csv, show, addElementToBox);
-      
-      const createDateInputElement = (option) => {
-        const box = cr("span");
-        box.style.display = "inline-block";
-        const txt = cr("span");
-        txt.textContent = option["title"];
-        box.appendChild(txt);
-        box.appendChild(cr("br"));
-        const dateInputElement = cr("input");
-        dateInputElement.setAttribute("id", option["elementId"]);
-        dateInputElement.setAttribute("type", "date");
-        dateInputElement.value = option["date"];
-        dateInputElement.onchange = show;
-        box.appendChild(dateInputElement);
-        divsels.appendChild(box);
-      }
-      
-      divsels.appendChild(cr("br"));
-      
-      createDateInputElement({
-        title: "開始日",
-        elementId: "fromDate",
-        date: dayjs().subtract(1, "months").format("YYYY-MM-DD")
-      });
-      createDateInputElement({
-        title: "終了日",
-        elementId: "toDate",
-        date: dayjs().format("YYYY-MM-DD")
-      });
-      
+      SurveySelector.createSelectElement(divsels, csv, show);
       show();
     });
     
