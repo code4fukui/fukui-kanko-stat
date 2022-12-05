@@ -1,6 +1,5 @@
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-
-
+import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
 
 class SurveySelector {
   // 各チャートの情報
@@ -230,7 +229,7 @@ class SurveySelector {
     return codes.sort();
   };
   
-  static createSelectElement(divsels, csv, show, beginDate, endDate) {
+  static createSelectElement(divsels, csv, show, fromDate, toDate) {
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -328,18 +327,26 @@ class SurveySelector {
     
     divsels.appendChild(document.createElement("br"));
     
-    const begin = !beginDate ? dayjs().subtract(1, "months") : dayjs(beginDate);
-    const end = !endDate ? dayjs() : dayjs(endDate);
+    const from = !fromDate ? dayjs().subtract(1, "months") : dayjs(fromDate);
+    const to = !toDate ? dayjs() : dayjs(toDate);
     createDateInputElement({
       title: "開始日",
       elementId: "fromDate",
-      date: begin.format("YYYY-MM-DD")
+      date: from.format("YYYY-MM-DD")
     });
     createDateInputElement({
       title: "終了日",
       elementId: "toDate",
-      date: end.format("YYYY-MM-DD")
+      date: to.format("YYYY-MM-DD")
     });
+  }
+
+  static getFromDate() {
+    return dayjs(document.getElementById("fromDate").value);
+  }
+
+  static getToDate() {
+    return dayjs(document.getElementById("toDate").value);
   }
 
   static filter(csv) {
@@ -361,8 +368,8 @@ class SurveySelector {
     };
 
     const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-    const fromDate = dayjs(document.getElementById("fromDate").value);
-    const toDate = dayjs(document.getElementById("toDate").value);
+    const fromDate = SurveySelector.getFromDate();
+    const toDate = SurveySelector.getToDate();
 
     return csv.filter(c => {
       const answerDate = dayjs(c["回答日時"]);
