@@ -15,8 +15,8 @@
     import { ChartPie } from "./ChartPie.js";
     import { ChartBar } from "./ChartBar.js";
     import { CSV } from "https://js.sabae.cc/CSV.js";
-    import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
     import {} from "./header.js";
+    import { SurveySelector } from "./survey-selector.js";
     
     // iOS14以前に関する対応（top-level await未対応のため）
     addEventListener("load", async () => {
@@ -38,132 +38,31 @@
       // 各チャートの情報
       let charts = {
         "都道府県": {
-          type: chartType["pie"],
-          selectCode: {
-            "北海道": 1,
-            "青森県": 2,
-            "岩手県": 3,
-            "宮城県": 4,
-            "秋田県": 5,
-            "山形県": 6,
-            "福島県": 7,
-            "茨城県": 8,
-            "栃木県": 9,
-            "群馬県": 10,
-            "埼玉県": 11,
-            "千葉県": 12,
-            "東京都": 13,
-            "神奈川県": 14,
-            "新潟県": 15,
-            "富山県": 16,
-            "石川県": 17,
-            "福井県": 18,
-            "山梨県": 19,
-            "長野県": 20,
-            "岐阜県": 21,
-            "静岡県": 22,
-            "愛知県": 23,
-            "三重県": 24,
-            "滋賀県": 25,
-            "京都府": 26,
-            "大阪府": 27,
-            "兵庫県": 28,
-            "奈良県": 29,
-            "和歌山県": 30,
-            "鳥取県": 31,
-            "島根県": 32,
-            "岡山県": 33,
-            "広島県": 34,
-            "山口県": 35,
-            "徳島県": 36,
-            "香川県": 37,
-            "愛媛県": 38,
-            "高知県": 39,
-            "福岡県": 40,
-            "佐賀県": 41,
-            "長崎県": 42,
-            "熊本県": 43,
-            "大分県": 44,
-            "宮崎県": 45,
-            "鹿児島県": 46,
-            "沖縄県": 47
-          }
+          type: chartType["pie"]
         },
         "年代": {
-          type: chartType["bar"],
-          selectCode: {
-            "10歳未満": 0,
-            "10代": 1,
-            "20代": 2,
-            "30代": 3,
-            "40代": 4,
-            "50代": 5,
-            "60代": 6,
-            "70代": 7,
-            "80歳以上": 8,
-          }
+          type: chartType["bar"]
         },
         "性別": {
-          type: chartType["pie"],
-          selectCode: {
-            "男": 0,
-            "女": 1,
-            "その他": 2,
-            "無回答": 3
-          }
+          type: chartType["pie"]
         },
         "6分類": {
-          type: chartType["pie"],
-          selectCode: {
-            "あわら市・坂井市": 0,
-            "勝山市・大野市": 1,
-            "福井市・永平寺町": 2,
-            "丹南": 3,
-            "嶺南東部（若狭町以東）": 4,
-            "嶺南西部（小浜市以西）": 5
-          }
+          type: chartType["pie"]
         },
         "回答エリア2": {
           type: chartType["pie"]
         },
         "世帯年収": {
-          type: chartType["bar"],
-          selectCode: {
-            "100万円未満": 0,
-            "100万円以上 200万円未満": 1,
-            "200万円以上 300万円未満": 2,
-            "300万円以上 400万円未満": 3,
-            "400万円以上 500万円未満": 4,
-            "500万円以上 600万円未満": 5,
-            "600万円以上 700万円未満": 6,
-            "700万円以上 800万円未満": 7,
-            "800万円以上 900万円未満": 8,
-            "900万円以上 1,000万円未満": 9,
-            "1,000万円以上 1,200万円未満": 10,
-            "1,200万円以上 1,500万円未満": 11,
-            "1,500万円以上": 12,
-            "分からない/無回答": 13
-          }
+          type: chartType["bar"]
         },
         "回答月": {
           type: chartType["pie"]
         },
         "満足度": {
-          type: chartType["pie"],
-          selectCode: {
-            "とても満足": 0,
-            "満足": 1,
-            "どちらでもない": 2,
-            "不満": 3,
-            "とても不満": 4
-          }
+          type: chartType["pie"]
         },
         "不便さ": {
-          type: chartType["pie"],
-          selectCode: {
-            "感じなかった": 0,
-            "感じた": 1
-          }
+          type: chartType["pie"]
         },
         "NPS": {
           type: chartType["pie"]
@@ -172,32 +71,10 @@
           type: chartType["pie"]
         },
         "今後の来訪意向": {
-          type: chartType["pie"],
-          selectCode: {
-            "また行きたい（1年以内）": 0,
-            "機会があれば行きたい": 1,
-            "どちらともいえない": 2,
-            "あまり行きたいと思わない": 3,
-            "行きたくない": 4,
-            "福井県在住": 5
-          }
+          type: chartType["pie"]
         },
         "同行者": {
-          type: chartType["pie"],
-          selectCode: {
-            "自分ひとり": 0,
-            "恋人": 1,
-            "夫婦2人": 2,
-            "小学生以下連れの家族": 3,
-            "中学生以上連れの家族": 4,
-            "親": 5,
-            "その他家族": 6,
-            "友人": 7,
-            "団体旅行": 8,
-            "学校関係（修学旅行・社会科見学等）": 9,
-            "職場の同僚": 10,
-            "その他": 11
-          }
+          type: chartType["pie"]
         }
       };
       
@@ -219,7 +96,7 @@
           break;
           
           case "同行者":
-          if (!Object.keys(charts[key]["selectCode"]).includes(data[key])) {
+          if (!Object.keys(SurveySelector.surveys[key]["selectCode"]).includes(data[key])) {
             data[key] = "その他";
           }
           break;
@@ -229,82 +106,8 @@
         }
       };
       
-      const sortSelectCodes = (name, codes) => {
-        switch(name) {
-          case "都道府県":
-          case "年代":
-          case "性別":
-          case "世帯年収":
-          case "満足度":
-          case "不便さ":
-          case "今後の来訪意向":
-          return codes.sort((c1, c2) => {
-            if (charts[name]["selectCode"][c1] < charts[name]["selectCode"][c2]) {
-              return -1;
-            }
-            
-            if (charts[name]["selectCode"][c1] > charts[name]["selectCode"][c2]) {
-              return 1;
-            }
-            
-            return 0;
-          });
-          
-          case "6分類":
-          case "同行者":
-          return Object.keys(charts[name]["selectCode"]).sort((c1, c2) => {
-            if (charts[name]["selectCode"][c1] < charts[name]["selectCode"][c2]) {
-              return -1;
-            }
-            
-            if (charts[name]["selectCode"][c1] > charts[name]["selectCode"][c2]) {
-              return 1;
-            }
-            
-            return 0;
-          });
-          
-          case "回答月":
-          return codes.sort((c1, c2) => {
-            const n1 = Number(c1.slice(-1));
-            const n2 = Number(c2.slice(-1));
-            
-            if (n1 < n2) {
-              return -1;
-            }
-            
-            if (n1 > n2) {
-              return 1;
-            }
-            
-            return 0;
-          });
-          
-          case "NPS":
-          return codes.sort((c1, c2) => {
-            const n1 = Number(c1);
-            const n2 = Number(c2);
-            
-            if (n1 < n2) {
-              return 1;
-            }
-            
-            if (n1 > n2) {
-              return -1;
-            }
-            
-            return 0;
-          });
-          
-          default:
-          break;
-        }
-        
-        return codes.sort();
-      };
-      
       const sortData = (key, obj) => {
-        const names = sortSelectCodes(key, Object.keys(obj));
+        const names = SurveySelector.sortSelectCodes(key, Object.keys(obj));
         const res = {};
         for (const name of names) {
           res[name] = obj[name];
@@ -498,32 +301,7 @@
       
       const cr = (tag) => document.createElement(tag);
       
-      const sels = Object.keys(charts);
-      for (const sel of sels) {
-        const box = cr("span");
-        box.style.display = "inline-block";
-        const txt = cr("span");
-        txt.textContent = sel;
-        box.appendChild(txt);
-        box.appendChild(cr("br"));
-        const s = cr("select");
-        s.setAttribute("multiple", true);
-        s.appendChild(cr("option"));
-        const names = sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
-        names.forEach(name => {
-          if (!name) {
-            return;
-          }
-          const opt = cr("option");
-          opt.textContent = name;
-          s.appendChild(opt);
-        });
-        box.appendChild(s);
-        addElementToBox(prefbox, sel, box);
-        divsels.appendChild(box);
-        s.dataname = sel;
-        s.onchange = show;
-      }
+      SurveySelector.createSelectElement(divsels, csv, show, addElementToBox);
       
       const createDateInputElement = (option) => {
         const box = cr("span");
