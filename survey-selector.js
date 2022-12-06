@@ -3,7 +3,7 @@ import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
 
 class SurveySelector {
   // 各チャートの情報
-  static surveys = {
+  surveys = {
     "都道府県": {
       selectCode: {
         "北海道": 1,
@@ -155,7 +155,7 @@ class SurveySelector {
     }
   };
   
-  static sortSelectCodes(name, codes) {
+  sortSelectCodes(name, codes) {
     switch(name) {
       case "都道府県":
       case "年代":
@@ -165,11 +165,11 @@ class SurveySelector {
       case "不便さ":
       case "今後の来訪意向":
       return codes.sort((c1, c2) => {
-        if (SurveySelector.surveys[name]["selectCode"][c1] < SurveySelector.surveys[name]["selectCode"][c2]) {
+        if (this.surveys[name]["selectCode"][c1] < this.surveys[name]["selectCode"][c2]) {
           return -1;
         }
         
-        if (SurveySelector.surveys[name]["selectCode"][c1] > SurveySelector.surveys[name]["selectCode"][c2]) {
+        if (this.surveys[name]["selectCode"][c1] > this.surveys[name]["selectCode"][c2]) {
           return 1;
         }
         
@@ -178,12 +178,12 @@ class SurveySelector {
       
       case "6分類":
       case "同行者":
-      return Object.keys(SurveySelector.surveys[name]["selectCode"]).sort((c1, c2) => {
-        if (SurveySelector.surveys[name]["selectCode"][c1] < SurveySelector.surveys[name]["selectCode"][c2]) {
+      return Object.keys(this.surveys[name]["selectCode"]).sort((c1, c2) => {
+        if (this.surveys[name]["selectCode"][c1] < this.surveys[name]["selectCode"][c2]) {
           return -1;
         }
         
-        if (SurveySelector.surveys[name]["selectCode"][c1] > SurveySelector.surveys[name]["selectCode"][c2]) {
+        if (this.surveys[name]["selectCode"][c1] > this.surveys[name]["selectCode"][c2]) {
           return 1;
         }
         
@@ -229,7 +229,7 @@ class SurveySelector {
     return codes.sort();
   };
 
-  static convertData(key, data) {
+  convertData(key, data) {
     switch (key) {
       case "6分類":
       switch (data[key]) {
@@ -247,7 +247,7 @@ class SurveySelector {
       break;
       
       case "同行者":
-      if (!Object.keys(SurveySelector.surveys[key]["selectCode"]).includes(data[key])) {
+      if (!Object.keys(this.surveys[key]["selectCode"]).includes(data[key])) {
         data[key] = "その他";
       }
       break;
@@ -257,7 +257,7 @@ class SurveySelector {
     }
   }
   
-  static createSelectElement(divsels, csv, show, fromDate, toDate) {
+  createSelectElement(divsels, csv, show, fromDate, toDate) {
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -310,7 +310,7 @@ class SurveySelector {
       }
     };
 
-    const sels = Object.keys(SurveySelector.surveys);
+    const sels = Object.keys(this.surveys);
     for (const sel of sels) {
       const box = document.createElement("span");
       box.style.display = "inline-block";
@@ -321,7 +321,7 @@ class SurveySelector {
       const s = document.createElement("select");
       s.setAttribute("multiple", true);
       s.appendChild(document.createElement("option"));
-      const names = SurveySelector.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
+      const names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
       names.forEach(name => {
         if (!name) {
           return;
@@ -369,15 +369,15 @@ class SurveySelector {
     });
   }
 
-  static getFromDate() {
+  getFromDate() {
     return dayjs(document.getElementById("fromDate").value);
   }
 
-  static getToDate() {
+  getToDate() {
     return dayjs(document.getElementById("toDate").value);
   }
 
-  static filter(csv) {
+  filter(csv) {
     const node2array = (nodes) => {
       const res = [];
       for (const n of nodes) {
@@ -396,8 +396,8 @@ class SurveySelector {
     };
 
     const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-    const fromDate = SurveySelector.getFromDate();
-    const toDate = SurveySelector.getToDate();
+    const fromDate = this.getFromDate();
+    const toDate = this.getToDate();
 
     return csv.filter(c => {
       const answerDate = dayjs(c["回答日時"]);
@@ -407,7 +407,7 @@ class SurveySelector {
       
       for (const key of keys) {
         if (key[1].length != 0) {
-          SurveySelector.convertData(key[0], c);
+          this.convertData(key[0], c);
           if (!key[1].includes(c[key[0]])) {
             return false;
           }
