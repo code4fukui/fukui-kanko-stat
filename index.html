@@ -21,6 +21,7 @@
     // iOS14以前に関する対応（top-level await未対応のため）
     addEventListener("load", async () => {
       title.textContent = document.title;
+      const surveySelector = new SurveySelector();
       
       //const url = "./fukui-answer.csv";
       const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
@@ -79,7 +80,7 @@
       };
       
       const sortData = (key, obj) => {
-        const names = SurveySelector.sortSelectCodes(key, Object.keys(obj));
+        const names = surveySelector.sortSelectCodes(key, Object.keys(obj));
         const res = {};
         for (const name of names) {
           res[name] = obj[name];
@@ -113,14 +114,14 @@
       const show = () => {
         divpie.innerHTML = "";
         console.log(divsels.querySelectorAll("select"));
-        const csv2 = SurveySelector.filter(csv);
+        const csv2 = surveySelector.filter(csv);
         
         if (csv2.length) {
           const names = Object.keys(charts);
           names.forEach((name, index) => {
             const data = {};
             for (const d of csv2) {
-              SurveySelector.convertData(name, d);
+              surveySelector.convertData(name, d);
               const v = d[name];
               if (!data[v]) {
                 data[v] = 1;
@@ -181,7 +182,7 @@
         };
       };
       
-      SurveySelector.createSelectElement(divsels, csv, show);
+      surveySelector.createSelectElement(divsels, csv, show);
       show();
     });
     
