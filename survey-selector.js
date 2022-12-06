@@ -228,6 +228,34 @@ class SurveySelector {
     
     return codes.sort();
   };
+
+  static convertData(key, data) {
+    switch (key) {
+      case "6分類":
+      switch (data[key]) {
+        case "嶺南東部":
+        data[key] += "（若狭町以東）";
+        break;
+        
+        case "嶺南西部":
+        data[key] += "（小浜市以西）";
+        break;
+        
+        default:
+        break;
+      }
+      break;
+      
+      case "同行者":
+      if (!Object.keys(SurveySelector.surveys[key]["selectCode"]).includes(data[key])) {
+        data[key] = "その他";
+      }
+      break;
+      
+      default:
+      break;
+    }
+  }
   
   static createSelectElement(divsels, csv, show, fromDate, toDate) {
     const addElementToBox = (box, sel, parent) => {
@@ -379,7 +407,7 @@ class SurveySelector {
       
       for (const key of keys) {
         if (key[1].length != 0) {
-          processData(key[0], c);
+          SurveySelector.convertData(key[0], c);
           if (!key[1].includes(c[key[0]])) {
             return false;
           }

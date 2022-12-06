@@ -78,34 +78,6 @@
         }
       };
       
-      const processData = (key, data) => {
-        switch (key) {
-          case "6分類":
-          switch (data[key]) {
-            case "嶺南東部":
-            data[key] += "（若狭町以東）";
-            break;
-            
-            case "嶺南西部":
-            data[key] += "（小浜市以西）";
-            break;
-            
-            default:
-            break;
-          }
-          break;
-          
-          case "同行者":
-          if (!Object.keys(SurveySelector.surveys[key]["selectCode"]).includes(data[key])) {
-            data[key] = "その他";
-          }
-          break;
-          
-          default:
-          break;
-        }
-      };
-      
       const sortData = (key, obj) => {
         const names = SurveySelector.sortSelectCodes(key, Object.keys(obj));
         const res = {};
@@ -148,7 +120,7 @@
           names.forEach((name, index) => {
             const data = {};
             for (const d of csv2) {
-              processData(name, d);
+              SurveySelector.convertData(name, d);
               const v = d[name];
               if (!data[v]) {
                 data[v] = 1;
