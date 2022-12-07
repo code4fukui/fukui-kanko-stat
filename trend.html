@@ -13,27 +13,28 @@
   (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
   
   <script type="module">
-    import { ChartLine } from "./ChartLine.js";
+    import { ChartLine } from "https://eiichimiyagawa.github.io/chart-line-plotly/chart-line.js";
     import { CSV } from "https://js.sabae.cc/CSV.js";
     import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
     import {} from "./header.js";
+    import { SurveySelector } from "./survey-selector.js";
     
     addEventListener("load", async () => {
       title.textContent = document.title;
+      const surveySelector = new SurveySelector();
       
       const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
       const data = await CSV.fetch(url);
       const csv = CSV.toJSON(data);
       
       // 各チャートの情報
-      let charts = {
+      const charts = {
         "都道府県": {},
         "年代": {},
         "性別": {},
         "6分類": {},
         "回答エリア2": {},
         "世帯年収": {},
-        "回答月": {},
         "満足度": {},
         "不便さ": {},
         "NPS": {},
@@ -41,9 +42,9 @@
         "今後の来訪意向": {},
         "同行者": {}
       };
-      
-      const sort = (obj) => {
-        const names = Object.keys(obj).sort();
+
+      const sortData = (key, obj) => {
+        const names = surveySelector.sortSelectCodes(key, Object.keys(obj));
         const res = {};
         for (const name of names) {
           res[name] = obj[name];
@@ -53,54 +54,21 @@
       
       const show = () => {
         divpie.innerHTML = "";
-        
-        const node2array = (nodes) => {
-          const res = [];
-          for (const n of nodes) {
-            res.push(n);
-          }
-          return res;
-        };
-        
-        const generateKeys = (selectedOptions) => {
-          const keys = [];
-          for (let i = 0; i < selectedOptions.length; i++) {
-            keys.push(selectedOptions[i].value);
-          }
-          // 空要素は削除
-          return keys.filter(Boolean);
-        }
-        
-        const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-        const fromDate = dayjs(document.getElementById("fromDate").value);
-        const toDate = dayjs(document.getElementById("toDate").value);
-        
-        const csv2 = csv.filter(c => {
-          const answerDate = dayjs(c["回答日時"]);
-          if (answerDate < fromDate || answerDate > toDate ) {
-            return false;
-          }
-          
-          for (const key of keys) {
-            if (key[1].length != 0) {
-              if (!key[1].includes(c[key[0]])) {
-                return false;
-              }
-            }
-          }
-          
-          return true;
-        });
+        const csv2 = surveySelector.filter(csv);
         
         if (csv2.length) {
           const names = Object.keys(charts);
           const lineBaseData = [];
-          for (let date = dayjs(document.getElementById("fromDate").value); date <= toDate; date = date.add(1, "day")) {
+          const fromDate = surveySelector.getFromDate();
+          const toDate = surveySelector.getToDate();
+          for (let date = fromDate; date <= toDate; date = date.add(1, "day")) {
             lineBaseData.push({name: date.format("YYYY-MM-DD"), value: 0});
           }
+          
           names.forEach((name, index) => {
             const data = {};
             for (const d of csv2) {
+              surveySelector.convertData(name, d);
               const v = d[name];
               if (!data[v]) {
                 data[v] = _.cloneDeep(lineBaseData);
@@ -110,14 +78,11 @@
               data[v][answerDate.diff(fromDate, "day")]["value"]++;
             }
             
-            const lineData = Object.keys(data).map(key => {
-              return data[key];
+            const lineData = sortData(name, data);
+            const chartLine = new ChartLine(lineData, {
+              width: window.innerWidth - 64
             });
-            
-            const chartLine = new ChartLine(lineData);
             chartLine.id = "chart-line" + index;
-            // スタイルを設定しないとグラフが表示されない
-            chartLine.setAttribute("style", "width:640px;height:480px;display:inline-block");
             const div2 = document.createElement("div");
             div2.style.display = "inline-block";
             const span = document.createElement("span");
@@ -131,116 +96,7 @@
         };
       };
       
-      const addElementToBox = (box, sel, parent) => {
-        switch (sel) {
-          case "都道府県":
-          const input = parent.querySelectorAll("select")[0];
-          
-          const allButton = document.createElement("button");
-          allButton.textContent = "全国";
-          allButton.onclick = (event) => {
-            input.querySelectorAll("option").forEach(o => {
-              o.selected = false;
-            });
-            input.onchange();
-          };
-          
-          const inButton = document.createElement("button");
-          inButton.textContent = "福井県内";
-          inButton.onclick = (event) => {
-            input.querySelectorAll("option").forEach(o => {
-              if (o.value == "福井県") {
-                o.selected = true;
-                return;
-              }
-              
-              o.selected = false;
-            });
-            input.onchange();
-          };
-          
-          const outButton = document.createElement("button");
-          outButton.textContent = "福井県外";
-          outButton.onclick = () => {
-            input.querySelectorAll("option").forEach(o => {
-              if (o.value == "福井県" || !o.value) {
-                o.selected = false;
-                return;
-              }
-              
-              o.selected = true;
-            });
-            input.onchange();
-          };
-          
-          box.appendChild(allButton);
-          box.appendChild(inButton);
-          box.appendChild(outButton);
-          break;
-          
-          default:
-          break;
-        }
-      };
-      
-      const cr = (tag) => document.createElement(tag);
-      
-      const sels = Object.keys(charts);
-      for (const sel of sels) {
-        const names = ArrayUtil.toUnique(csv.map(a => a[sel])).sort();
-        const box = cr("span");
-        box.style.display = "inline-block";
-        const txt = cr("span");
-        txt.textContent = sel;
-        box.appendChild(txt);
-        box.appendChild(cr("br"));
-        const s = cr("select");
-        s.setAttribute("multiple", true);
-        s.appendChild(cr("option"));
-        names.forEach(name => {
-          if (!name) {
-            return;
-          }
-          const opt = cr("option");
-          opt.textContent = name;
-          s.appendChild(opt);
-        });
-        box.appendChild(s);
-        addElementToBox(prefbox, sel, box);
-        divsels.appendChild(box);
-        s.dataname = sel;
-        s.onchange = show;
-      }
-      
-      const createDateInputElement = (option) => {
-        const box = cr("span");
-        box.style.display = "inline-block";
-        const txt = cr("span");
-        txt.textContent = option["title"];
-        box.appendChild(txt);
-        box.appendChild(cr("br"));
-        const dateInputElement = cr("input");
-        dateInputElement.setAttribute("id", option["elementId"]);
-        dateInputElement.setAttribute("type", "date");
-        dateInputElement.value = option["date"];
-        dateInputElement.onchange = show;
-        box.appendChild(dateInputElement);
-        divsels.appendChild(box);
-      }
-      
-      divsels.appendChild(cr("br"));
-      
-      createDateInputElement({
-        title: "開始日",
-        elementId: "fromDate",
-        date: dayjs().subtract(1, "months").format("YYYY-MM-DD")
-      });
-      createDateInputElement({
-        title: "終了日",
-        elementId: "toDate",
-        date: dayjs().format("YYYY-MM-DD")
-      });
-      
+      surveySelector.createSelectElement(divsels, csv, show);
       show();
     });
   </script>
