@@ -6,6 +6,7 @@
 - [福井県観光アンケートコメントマップ](https://code4fukui.github.io/sightseeingApp/)
 - [福井県観光オープンデータコメント新着順](https://code4fukui.github.io/fukui-kanko-stat/comment.html)
 - [福井観光エリア満足度ランキング](https://code4fukui.github.io/fukui-kanko-stat/ranking.html)
+- [福井県観光ハッシュタグ別投稿数推移 on Instagram](https://code4fukui.github.io/fukui-kanko-hashtag/)
 
 ## オープンデータ
 
