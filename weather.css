@@ -1,0 +1,31 @@
+#weather-grid {
+  display: grid;
+  height: 100%;
+  grid-template-rows: 56px auto;
+}
+
+#week-button {
+  grid-row: 1;
+  overflow-y: auto;
+  border-top: solid #999999 1px;
+  border-bottom: solid #999999 1px;
+}
+
+#weather-data {
+  grid-row: 2;
+  overflow-y: auto;
+}
+
+#weather-data table {
+  border: none;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#weather-data th, td {
+  margin: 0px;
+  padding: 0px;
+  border: solid #999999 1px;
+  white-space: nowrap;
+}

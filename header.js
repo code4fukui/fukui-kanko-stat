@@ -13,7 +13,7 @@ addEventListener("load", async () => {
   // const base = "https://code4fukui.github.io/fukui-kanko-stat/";
   const base = "./";
   
-  const url = base + "apps.csv";
+  const url = base + "data/apps.csv";
   const smenu = await CSV.fetchJSON(url);
   console.log(smenu);
   

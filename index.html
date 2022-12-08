@@ -2,14 +2,19 @@
   <title>福井県観光アンケート（データ出典：福井県観光連盟）</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
 </head><body>
-  <h1 id=title></h1>
-  
-  <div id=prefbox></div>
-  <div id=divsels></div>
-  <div id=divpie></div>
-  <hr>
-  <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
-  (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+  <div id="grid-area">
+    <div id="top-area">
+      <h1 id=title></h1>
+      <div id=prefbox></div>
+      <div id=divsels></div>
+      <div id=divpie></div>
+      <hr />
+      <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
+      (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+    </div>
+    <div id="bottom-area">
+    </div>
+  </div>
   
   <script type="module">
     import { ChartPie } from "./ChartPie.js";
@@ -17,11 +22,13 @@
     import { CSV } from "https://js.sabae.cc/CSV.js";
     import {} from "./header.js";
     import { SurveySelector } from "./survey-selector.js";
+    import { Weather } from "./weather.js";
     
     // iOS14以前に関する対応（top-level await未対応のため）
     addEventListener("load", async () => {
       title.textContent = document.title;
       const surveySelector = new SurveySelector();
+      const weather = new Weather(document.getElementById("bottom-area"));
       
       //const url = "./fukui-answer.csv";
       const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
@@ -155,7 +162,7 @@
             div2.appendChild(chartPie);
             div2.appendChild(chartBar);
             divpie.append(div2);
-            changeChart(name, index)
+            changeChart(name, index);
           });
           
           /*
@@ -202,6 +209,23 @@
     }
     #prefbox > * {
       margin: .5em .2em;
+    }
+    
+    #grid-area {
+      display: grid;
+      width: 100%;
+      height: 100vh;
+      grid-template-rows: auto 240px;
+    }
+    
+    #top-area {
+      grid-row: 1;
+      overflow-y: auto;
+    }
+    
+    #bottom-area {
+      grid-row: 2;
+      overflow-y: auto;
     }
   </style>
   
