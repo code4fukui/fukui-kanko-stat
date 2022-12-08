@@ -400,7 +400,7 @@ class SurveySelector {
     const toDate = this.getToDate();
 
     return csv.filter(c => {
-      const answerDate = dayjs(c["回答日時"]);
+      const answerDate = dayjs(c["回答日時"]).hour(0).minute(0).second(0);
       if (answerDate < fromDate || answerDate > toDate ) {
         return false;
       }
