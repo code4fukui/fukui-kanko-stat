@@ -6,11 +6,11 @@ import { CSV } from "https://js.sabae.cc/CSV.js";
 // https://code4fukui.github.io/jma_station/jma_station_active.csv
 const weathers = {
   "福井": {
-    url: "./data/2022weather-fukui.csv",
+    url: "./data/weather-fukui.csv",
     jmaStationNumber: "57066"
   },
   "敦賀": {
-    url: "./data/2022weather-tsuruga.csv",
+    url: "./data/weather-tsuruga.csv",
     jmaStationNumber: "57248"
   }
 };
