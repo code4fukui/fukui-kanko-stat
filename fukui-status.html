@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>福井県過去データ</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
+</head><body>
+  <h1 id=title></h1>
+  <div id="weather-area"></div>
+  </div>
+  <hr />
+      <a href=https://www.data.jma.go.jp/gmd/risk/obsdl/index.php>CSVデータ</a>
+      (<a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+
+  <script type="module">
+    import {} from "./header.js";
+    import { Weather } from "./weather.js";
+    
+    // iOS14以前に関する対応（top-level await未対応のため）
+    addEventListener("load", async () => {
+      title.textContent = document.title;
+      const weather = new Weather(document.getElementById("weather-area"));
+    });
+  </script>
+  
+  <style>
+    body {
+      text-align: center;
+      font-family: sans-serif;
+    }
+    textarea {
+      width: 70vw;
+      height: 8em;
+    }
+    #divsels {
+      margin-bottom: .5em;
+    }
+    #prefbox > * {
+      margin: .5em .2em;
+    }
+  </style>
+  
+  
