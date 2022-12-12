@@ -4,11 +4,9 @@
   grid-template-rows: 56px auto;
 }
 
-#week-button {
+#weather-button {
   grid-row: 1;
   overflow-y: auto;
-  border-top: solid #999999 1px;
-  border-bottom: solid #999999 1px;
 }
 
 #weather-data {
