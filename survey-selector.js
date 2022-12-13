@@ -1,5 +1,6 @@
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
+import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/locale/ja.min.js";
 
 class SurveySelector {
   // 各チャートの情報
