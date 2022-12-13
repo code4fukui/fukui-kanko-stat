@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>滞在人口1kmメッシュデータ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.1.0/ol.css">
+  <script src="https://cdn.jsdelivr.net/npm/ol@v7.1.0/dist/ol.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
+</head><body>
+  <h1 id=title></h1>
+  <div id="select">
+    <select id="year"></select>年
+    <select id="month"></select>月
+    測定日属性<select id="dayflag"></select>
+    タイムゾーン<select id="timezone"></select>
+  </div>
+  <div id="olmap" style="width:auto;height:600px;"></div>
+  <div id="popup" class="ol-popup">
+    <div id="popup-content"></div>
+  </div>
+</div>
+<hr />
+<a href=https://www.geospatial.jp/ckan/dataset/mlit-1km-fromto>全国の人流オープンデータ（1kmメッシュ、市区町村単位発地別） - データセット - CSVデータ</a>
+(<a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+
+<script type="module">
+  import {} from "./header.js";
+  import { OLMap } from "https://eiichimiyagawa.github.io/OLMap/v1/OLMap.js";
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  
+  // iOS14以前に関する対応（top-level await未対応のため）
+  addEventListener("load", async () => {
+    title.textContent = document.title;
+    
+    const yearSelectElement = document.getElementById("year");
+    for (let n = 2021; n <= 2021; n++) {
+      const option = document.createElement("option");
+      option.textContent = n;
+      option.value = n;
+      yearSelectElement.append(option);
+    }
+    
+    const monthSelectElement = document.getElementById("month");
+    for (let n = 1; n <= 12; n++) {
+      const option = document.createElement("option");
+      option.textContent = n;
+      option.value = n;
+      monthSelectElement.append(option);
+    }
+    
+    const dayflagSelectElement = document.getElementById("dayflag");
+    const dayflagOption0 = document.createElement("option");
+    dayflagOption0.textContent = "休日";
+    dayflagOption0.value = 0;
+    dayflagSelectElement.append(dayflagOption0);
+    const dayflagOption1 = document.createElement("option");
+    dayflagOption1.textContent = "平日";
+    dayflagOption1.value = 1;
+    dayflagSelectElement.append(dayflagOption1);
+    const dayflagOption2 = document.createElement("option");
+    dayflagOption2.textContent = "全日";
+    dayflagOption2.value = 2;
+    dayflagSelectElement.append(dayflagOption2);
+    
+    const timezoneSelectElement = document.getElementById("timezone");
+    const timezoneOption0 = document.createElement("option");
+    timezoneOption0.textContent = "昼";
+    timezoneOption0.value = 0;
+    timezoneSelectElement.append(timezoneOption0);
+    const timezoneOption1 = document.createElement("option");
+    timezoneOption1.textContent = "深夜";
+    timezoneOption1.value = 1;
+    timezoneSelectElement.append(timezoneOption1);
+    const timezoneOption2 = document.createElement("option");
+    timezoneOption2.textContent = "終日";
+    timezoneOption2.value = 2;
+    timezoneSelectElement.append(timezoneOption2);
+    
+    let year = yearSelectElement.value;
+    let month = monthSelectElement.value;
+    // “0”:休日 “1”:平日 “2”:全日
+    let dayFlag = dayflagSelectElement.value;
+    // “0”:昼 “1”:深夜 “2”:終日
+    let timeZone = timezoneSelectElement.value;
+    
+    const map = new OLMap({
+      zoom: 10
+    });
+    
+    const mesh = await CSV.toJSON(await CSV.fetch("./data/attribute_mesh1km_2020.csv"));
+    map.addVectorLayer("mesh");
+    
+    const showMesh = (async () => {
+      const styleFunction = (feature) => {
+        feature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: feature.get("stroke"),
+            width: 1,
+          }),
+          fill: new ol.style.Fill({
+            color: feature.get("fill"),
+          }),
+        }))
+      };
+      
+      const meshLayer = map.getLayer("mesh");
+      meshLayer.setSource(null);
+      meshLayer.setStyle(styleFunction);
+      
+      const population = await CSV.toJSON(await CSV.fetch(`./data/${year}${month.toString().padStart(2, "0")}monthly_mdp_mesh1km.csv`));
+      const populationData = {};
+      let maxPopulation = 0;
+      population.forEach((p) => {
+        populationData[`${p["mesh1kmid"]}-${p["dayflag"]}-${p["timezone"]}`] = p["population"];
+        if (p["dayflag"] == dayFlag && p["timezone"] == timeZone && parseInt(p["population"]) > maxPopulation) {
+          maxPopulation = p["population"];
+        } 
+      });
+      
+      const geojsonObject = {
+        'type': 'FeatureCollection',
+        'crs': {
+          'type': 'name',
+          'properties': {
+            'name': 'EPSG:3857',
+          },
+        },
+        'features': []
+      }
+      
+      mesh.forEach((m) => {
+        const populationKey = `${m["mesh1kmid"]}-${dayFlag}-${timeZone}`;
+        const population = populationData[populationKey] ? populationData[populationKey] : 0;
+        const populationStr = population >= 10 ? `${population}人` : "10人未満"
+        const feature = {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Polygon',
+            'coordinates': [
+            [
+            [m["lon_max"], m["lat_max"]],
+            [m["lon_max"], m["lat_min"]],
+            [m["lon_min"], m["lat_min"]],
+            [m["lon_min"], m["lat_max"]]
+            ],
+            ],
+          },
+          "properties": {
+            stroke: `rgba(32, 32, 32, 0.75)`,
+            fill: `rgba(${255 - parseInt(255 * population / maxPopulation)}, ${parseInt(255 * population / maxPopulation)}, 0, 0.4)`,
+            content: `滞在人口：${populationStr}`
+          }
+        };
+        geojsonObject["features"].push(feature);
+      });
+      
+      const source = new ol.source.Vector({
+        features: new ol.format.GeoJSON({
+          featureProjection: 'EPSG:3857'
+        }).readFeatures(geojsonObject)
+      });
+      meshLayer.setSource(source);
+    });
+    
+    yearSelectElement.onchange = ((event) => {
+      year = event.target.value;
+      showMesh();
+    });
+    monthSelectElement.onchange = ((event) => {
+      month = event.target.value;
+      showMesh();
+    });
+    dayflagSelectElement.onchange = ((event) => {
+      dayFlag = event.target.value;
+      showMesh();
+    });
+    timezoneSelectElement.onchange = ((event) => {
+      timeZone = event.target.value;
+      showMesh();
+    });
+    
+    showMesh();
+  });
+</script>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+  }
+  textarea {
+    width: 70vw;
+    height: 8em;
+  }
+  #divsels {
+    margin-bottom: .5em;
+  }
+  #prefbox > * {
+    margin: .5em .2em;
+  }
+  
+  .ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+  }
+  .ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  .ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+  }
+  .ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+  }
+</style>
+
