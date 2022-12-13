@@ -337,9 +337,27 @@ class SurveySelector {
       s.dataname = sel;
       s.onchange = show;
     }
+    
+    divsels.appendChild(document.createElement("br"));
+    
+    const from = !fromDate ? dayjs().subtract(1, "months") : dayjs(fromDate);
+    const to = !toDate ? dayjs() : dayjs(toDate);
+    this.createDateInputElement(divsels, {
+      title: "開始日",
+      elementId: "fromDate",
+      date: from.format("YYYY-MM-DD"),
+      onChange: show
+    });
+    this.createDateInputElement(divsels, {
+      title: "終了日",
+      elementId: "toDate",
+      date: to.format("YYYY-MM-DD"),
+      onChange: show
+    });
+  }
 
-    const createDateInputElement = (option) => {
-      const box = document.createElement("span");
+  createDateInputElement(parent, option) {
+    const box = document.createElement("span");
       box.style.display = "inline-block";
       const txt = document.createElement("span");
       txt.textContent = option["title"];
@@ -349,25 +367,11 @@ class SurveySelector {
       dateInputElement.setAttribute("id", option["elementId"]);
       dateInputElement.setAttribute("type", "date");
       dateInputElement.value = option["date"];
-      dateInputElement.onchange = show;
+      if (option["onChange"]) {
+        dateInputElement.onchange = option["onChange"];
+      }
       box.appendChild(dateInputElement);
-      divsels.appendChild(box);
-    }
-    
-    divsels.appendChild(document.createElement("br"));
-    
-    const from = !fromDate ? dayjs().subtract(1, "months") : dayjs(fromDate);
-    const to = !toDate ? dayjs() : dayjs(toDate);
-    createDateInputElement({
-      title: "開始日",
-      elementId: "fromDate",
-      date: from.format("YYYY-MM-DD")
-    });
-    createDateInputElement({
-      title: "終了日",
-      elementId: "toDate",
-      date: to.format("YYYY-MM-DD")
-    });
+      parent.appendChild(box);
   }
 
   getFromDate() {
