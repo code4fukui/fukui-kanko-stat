@@ -24,7 +24,9 @@
   import {} from "./header.js";
   import { OLMap } from "https://eiichimiyagawa.github.io/OLMap/v1/OLMap.js";
   import { CSV } from "https://js.sabae.cc/CSV.js";
-  
+  import chroma from "https://code4fukui.github.io/chroma-es/chroma.min.js";
+  import { addComma } from "https://js.sabae.cc/addComma.js";
+
   // iOS14以前に関する対応（top-level await未対応のため）
   addEventListener("load", async () => {
     title.textContent = document.title;
@@ -60,18 +62,13 @@
     dayflagSelectElement.append(dayflagOption2);
     
     const timezoneSelectElement = document.getElementById("timezone");
-    const timezoneOption0 = document.createElement("option");
-    timezoneOption0.textContent = "昼";
-    timezoneOption0.value = 0;
-    timezoneSelectElement.append(timezoneOption0);
-    const timezoneOption1 = document.createElement("option");
-    timezoneOption1.textContent = "深夜";
-    timezoneOption1.value = 1;
-    timezoneSelectElement.append(timezoneOption1);
-    const timezoneOption2 = document.createElement("option");
-    timezoneOption2.textContent = "終日";
-    timezoneOption2.value = 2;
-    timezoneSelectElement.append(timezoneOption2);
+    const timezoneOptions = ["昼", "深夜", "終日", "昼-深夜"];
+    for (let i = 0; i < timezoneOptions.length; i++) {
+      const opt = document.createElement("option");
+      opt.textContent = timezoneOptions[i];
+      opt.value = i;
+      timezoneSelectElement.append(opt);
+    }
     
     let year = yearSelectElement.value;
     let month = monthSelectElement.value;
@@ -125,30 +122,77 @@
         'features': []
       }
       
+      // https://fukuno.jig.jp/3743
+      const cs = chroma.scale(["#ff0", "#f00", "#400"]).mode("rgb").out("rgb");
+      //const cs = chroma.scale(["#f00", "#fff", "#00f"]).mode("rgb").out("rgb");
+      const showPop = (n, flg) => {
+        if (!n && !flg) {
+          return "10人未満";
+        }
+        return addComma(n) + "人";
+      };
       mesh.forEach((m) => {
-        const populationKey = `${m["mesh1kmid"]}-${dayFlag}-${timeZone}`;
-        const population = populationData[populationKey] ? populationData[populationKey] : 0;
-        const populationStr = population >= 10 ? `${population}人` : "10人未満"
-        const feature = {
-          'type': 'Feature',
-          'geometry': {
-            'type': 'Polygon',
-            'coordinates': [
-            [
-            [m["lon_max"], m["lat_max"]],
-            [m["lon_max"], m["lat_min"]],
-            [m["lon_min"], m["lat_min"]],
-            [m["lon_min"], m["lat_max"]]
-            ],
-            ],
-          },
-          "properties": {
-            stroke: `rgba(32, 32, 32, 0.75)`,
-            fill: `rgba(${255 - parseInt(255 * population / maxPopulation)}, ${parseInt(255 * population / maxPopulation)}, 0, 0.4)`,
-            content: `滞在人口：${populationStr}`
+        //const populationStr = population >= 10 ? `${population}人` : "10人未満"
+        const popday = populationData[`${m["mesh1kmid"]}-${dayFlag}-0`] || 0;
+        const popnight = populationData[`${m["mesh1kmid"]}-${dayFlag}-1`] || 0;
+        const popall = populationData[`${m["mesh1kmid"]}-${dayFlag}-2`] || 0;
+        const populationStr = `<br>昼 ${showPop(popday)}<br>深夜 ${showPop(popnight)}<br>終日 ${showPop(popall)}<br>昼-深夜 ${showPop(popday - popnight, true)}`;
+        const getColor = () => {
+          if (timeZone <= 2) {
+            const populationKey = `${m["mesh1kmid"]}-${dayFlag}-${timeZone}`;
+            const population = populationData[populationKey] ? populationData[populationKey] : 0;
+            //const color = `rgba(${255 - parseInt(255 * population / maxPopulation)}, ${parseInt(255 * population / maxPopulation)}, 0, 0.4)`;
+            const n = population / maxPopulation;
+            if (population == 0) {
+              return null;
+            }
+            const c = cs(n);
+            const color = population ? `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.4)` : "rgba(255, 255, 255, 0.4)";
+            return color;
+          } else if (timeZone == 3) {
+            const calcDiff = (n, m) => {
+              return n - m;
+              //const d = (n - m) / Math.max(n, m);
+              //const res = d / 2 + 0.5;
+              //console.log(n, m, res)
+              //return res;
+            };
+            if (!popday && !popnight) {
+              return null;
+            }
+            const n = popday - popnight;
+            if (n == 0) {
+              return "rgba(255, 255, 0, 0.4)";
+            } else if (n > 0) {
+              return "rgba(255, 0, 0, 0.4)";
+            } else {
+              return "rgba(0, 0, 255, 0.4)";
+            }
           }
         };
-        geojsonObject["features"].push(feature);
+        const color = getColor();
+        if (color != null) {
+          const feature = {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Polygon',
+              'coordinates': [
+                [
+                  [m["lon_max"], m["lat_max"]],
+                  [m["lon_max"], m["lat_min"]],
+                  [m["lon_min"], m["lat_min"]],
+                  [m["lon_min"], m["lat_max"]]
+                ],
+              ],
+            },
+            "properties": {
+              stroke: `rgba(32, 32, 32, 0.75)`,
+              fill: color,
+              content: `滞在人口：${populationStr}`
+            }
+          };
+          geojsonObject["features"].push(feature);
+        }
       });
       
       const source = new ol.source.Vector({
