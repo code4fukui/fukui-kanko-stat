@@ -229,7 +229,7 @@ class SurveySelector {
     
     return codes.sort();
   };
-
+  
   convertData(key, data) {
     switch (key) {
       case "6分類":
@@ -310,7 +310,7 @@ class SurveySelector {
         break;
       }
     };
-
+    
     const sels = Object.keys(this.surveys);
     for (const sel of sels) {
       const box = document.createElement("span");
@@ -355,33 +355,33 @@ class SurveySelector {
       onChange: show
     });
   }
-
+  
   createDateInputElement(parent, option) {
     const box = document.createElement("span");
-      box.style.display = "inline-block";
-      const txt = document.createElement("span");
-      txt.textContent = option["title"];
-      box.appendChild(txt);
-      box.appendChild(document.createElement("br"));
-      const dateInputElement = document.createElement("input");
-      dateInputElement.setAttribute("id", option["elementId"]);
-      dateInputElement.setAttribute("type", "date");
-      dateInputElement.value = option["date"];
-      if (option["onChange"]) {
-        dateInputElement.onchange = option["onChange"];
-      }
-      box.appendChild(dateInputElement);
-      parent.appendChild(box);
+    box.style.display = "inline-block";
+    const txt = document.createElement("span");
+    txt.textContent = option["title"];
+    box.appendChild(txt);
+    box.appendChild(document.createElement("br"));
+    const dateInputElement = document.createElement("input");
+    dateInputElement.setAttribute("id", option["elementId"]);
+    dateInputElement.setAttribute("type", "date");
+    dateInputElement.value = option["date"];
+    if (option["onChange"]) {
+      dateInputElement.onchange = option["onChange"];
+    }
+    box.appendChild(dateInputElement);
+    parent.appendChild(box);
   }
-
+  
   getFromDate() {
     return dayjs(document.getElementById("fromDate").value);
   }
-
+  
   getToDate() {
     return dayjs(document.getElementById("toDate").value);
   }
-
+  
   filter(csv) {
     const node2array = (nodes) => {
       const res = [];
@@ -390,7 +390,7 @@ class SurveySelector {
       }
       return res;
     };
-
+    
     const generateKeys = (selectedOptions) => {
       const keys = [];
       for (let i = 0; i < selectedOptions.length; i++) {
@@ -399,11 +399,11 @@ class SurveySelector {
       // 空要素は削除
       return keys.filter(Boolean);
     };
-
+    
     const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
     const fromDate = this.getFromDate();
     const toDate = this.getToDate();
-
+    
     return csv.filter(c => {
       const answerDate = dayjs(c["回答日時"]).hour(0).minute(0).second(0);
       if (answerDate < fromDate || answerDate > toDate ) {
