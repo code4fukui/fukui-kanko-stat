@@ -1,0 +1,507 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>RENEW Pay決済データ（データ出展: 株式会社ふくいのデジタル＆ふくいドットコム 福井県観光データ分析システム FTAS）</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
+</head><body>
+  <h1 id=title></h1>
+  <div id=prefbox></div>
+  <div id=divsels></div>
+  <div id=divpie></div>
+  <hr />
+  <a href=https://code4fukui.github.io/opendata_fukui/renewpay_payment_2022.csv>CSVデータ</a>
+  (<a href=https://github.com/code4fukui/opendata_fukui/blob/main/renewpay_payment_2022.csv>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+</div>
+
+<script type="module">
+  import { ChartPie } from "./ChartPie.js";
+  import { ChartBar } from "https://eiichimiyagawa.github.io/chart-bar-plotly/chart-bar.js";
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  import {} from "./header.js";
+  import { SurveySelector } from "./survey-selector.js";
+  
+  // iOS14以前に関する対応（top-level await未対応のため）
+  addEventListener("load", async () => {
+    title.textContent = document.title;
+    const surveySelector = new SurveySelector();
+    
+    const surveys = {
+      "都道府県": {
+        selectCode: {
+          "北海道": 1,
+          "青森県": 2,
+          "岩手県": 3,
+          "宮城県": 4,
+          "秋田県": 5,
+          "山形県": 6,
+          "福島県": 7,
+          "茨城県": 8,
+          "栃木県": 9,
+          "群馬県": 10,
+          "埼玉県": 11,
+          "千葉県": 12,
+          "東京都": 13,
+          "神奈川県": 14,
+          "新潟県": 15,
+          "富山県": 16,
+          "石川県": 17,
+          "福井県": 18,
+          "山梨県": 19,
+          "長野県": 20,
+          "岐阜県": 21,
+          "静岡県": 22,
+          "愛知県": 23,
+          "三重県": 24,
+          "滋賀県": 25,
+          "京都府": 26,
+          "大阪府": 27,
+          "兵庫県": 28,
+          "奈良県": 29,
+          "和歌山県": 30,
+          "鳥取県": 31,
+          "島根県": 32,
+          "岡山県": 33,
+          "広島県": 34,
+          "山口県": 35,
+          "徳島県": 36,
+          "香川県": 37,
+          "愛媛県": 38,
+          "高知県": 39,
+          "福岡県": 40,
+          "佐賀県": 41,
+          "長崎県": 42,
+          "熊本県": 43,
+          "大分県": 44,
+          "宮崎県": 45,
+          "鹿児島県": 46,
+          "沖縄県": 47
+        }
+      },
+      "年代": {
+        selectCode: {
+          "10歳未満": 0,
+          "10代": 1,
+          "20代": 2,
+          "30代": 3,
+          "40代": 4,
+          "50代": 5,
+          "60代": 6,
+          "70代": 7,
+          "80歳以上": 8,
+        }
+      },
+      "性別": {
+        selectCode: {
+          "男性": 0,
+          "女性": 1,
+          "その他": 2,
+          "回答なし": 3
+        }
+      },
+      "商品券決済金額": {
+        selectCode: {
+          "1,000円未満": 0,
+          "1,000円以上 5,000円未満": 1,
+          "5,000円以上 10,000円未満": 2,
+          "10,000円以上 15,000円未満": 3,
+          "15,000円以上 20,000円未満": 4,
+          "20,000円以上 25,000円未満": 5,
+          "25,000円以上 30,000円未満": 6,
+          "30,000円以上 35,000円未満": 7,
+          "35,000円以上 40,000円未満": 8,
+          "40,000円以上 45,000円未満": 9,
+          "45,000円以上 50,000円未満": 10,
+          "50,000円以上": 11
+        }
+      },
+      "産業": {
+        selectCode: {
+          "飲食": 0,
+          "眼鏡": 1,
+          "漆器": 2,
+          "焼物": 3,
+          "繊維": 4,
+          "打刃物": 5,
+          "箪笥": 6,
+          "和紙": 7,
+          "その他": 8
+        }
+      },
+      "3市町": {
+        selectCode: {
+          "鯖江市": 0,
+          "越前市": 1,
+          "越前町": 2
+        }
+      }
+    };
+    
+    const sortSelectCodes= ((name, codes) => {
+      return codes.sort((c1, c2) => {
+        if (surveys[name]["selectCode"][c1] < surveys[name]["selectCode"][c2]) {
+          return -1;
+        }
+        
+        if (surveys[name]["selectCode"][c1] > surveys[name]["selectCode"][c2]) {
+          return 1;
+        }
+        
+        return 0;
+      });
+    });
+    
+    const url = "https://code4fukui.github.io/opendata_fukui/renewpay_payment_2022.csv";
+    const data = await CSV.fetch(url);
+    const csv = await CSV.toJSON(data);
+    
+    // チャートの種類
+    const chartType = {
+      "pie": "円グラフ",
+      "bar": "棒グラフ"
+    }
+    
+    // 各チャートの情報
+    const charts = {
+      "都道府県": {
+        type: chartType["pie"]
+      },
+      "年代": {
+        type: chartType["bar"]
+      },
+      "性別": {
+        type: chartType["pie"]
+      },
+      "商品券決済金額": {
+        type: chartType["pie"]
+      },
+      "産業": {
+        type: chartType["pie"]
+      },
+      "3市町": {
+        type: chartType["bar"]
+      }
+    };
+    
+    const sortData = (key, obj) => {
+      const names = sortSelectCodes(key, Object.keys(obj));
+      const res = {};
+      for (const name of names) {
+        res[name] = obj[name];
+      }
+      return res;
+    };
+    
+    const onChangeChartSelect = (title, index, event) => {
+      charts[title]["type"] = event.target.value;
+      changeChart(title, index);
+    };
+    
+    const changeChart = (title, index) => {
+      const chartPie = document.getElementById("chart-pie" + index);
+      const chartBar = document.getElementById("chart-bar" + index);
+      
+      switch (charts[title]["type"]) {
+        case chartType["pie"]:
+        chartPie.style.display = "inline-block";
+        chartBar.style.display = "none";
+        break;
+        case chartType["bar"]:
+        chartPie.style.display = "none";
+        chartBar.style.display = "inline-block";
+        break;
+        default:
+        break;
+      }
+    };
+    
+    const show = () => {
+      divpie.innerHTML = "";
+
+      const convertKey = ((key) => {
+          switch (key) {
+            case "年代":
+            return "年齢";
+            
+            default:
+            break;
+          }
+          
+          return key;
+        });
+        
+        const convertData = ((key, baseData) => {
+          switch (key) {
+            case "年代":
+            if (baseData < 10) {
+              return "10歳未満";
+            }
+            if (baseData < 20) {
+              return "10代";
+            }
+            if (baseData < 30) {
+              return "20代";
+            }
+            if (baseData < 40) {
+              return "30代";
+            }
+            if (baseData < 50) {
+              return "40代";
+            }
+            if (baseData < 60) {
+              return "50代";
+            }
+            if (baseData < 70) {
+              return "60代";
+            }
+            if (baseData < 80) {
+              return "70代";
+            }
+            return "80歳以上";
+            
+            case "商品券決済金額":
+            const money = Number(baseData.replace(/,/g, ""));
+            if (money < 1000) {
+              return "1,000円未満";
+            }
+            if (money < 5000) {
+              return "1,000円以上 5,000円未満";
+            }
+            if (money < 10000) {
+              return "5,000円以上 10,000円未満";
+            }
+            if (money < 15000) {
+              return "10,000円以上 15,000円未満";
+            }
+            if (money < 20000) {
+              return "15,000円以上 20,000円未満";
+            }
+            if (money < 25000) {
+              return "20,000円以上 25,000円未満";
+            }
+            if (money < 30000) {
+              return "25,000円以上 30,000円未満";
+            }
+            if (money < 35000) {
+              return "20,000円以上 35,000円未満";
+            }
+            if (money < 40000) {
+              return "35,000円以上 40,000円未満";
+            }
+            if (money < 45000) {
+              return "40,000円以上 45,000円未満";
+            }
+            if (money < 50000) {
+              return "45,000円以上 50,000円未満";
+            }
+            return "50,000円以上";
+            
+            default:
+            break;
+          }
+          
+          return baseData;
+        });
+
+      const filter = ((csv) => {
+        const node2array = (nodes) => {
+          const res = [];
+          for (const n of nodes) {
+            res.push(n);
+          }
+          return res;
+        };
+        
+        const generateKeys = (selectedOptions) => {
+          const keys = [];
+          for (let i = 0; i < selectedOptions.length; i++) {
+            keys.push(selectedOptions[i].value);
+          }
+          // 空要素は削除
+          return keys.filter(Boolean);
+        };
+        
+        const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
+        const fromDate = surveySelector.getFromDate();
+        const toDate = surveySelector.getToDate();
+        
+        return csv.filter(c => {
+          const answerDate = dayjs(c["商品券決済日時"]).hour(0).minute(0).second(0);
+          if (answerDate < fromDate || answerDate > toDate ) {
+            return false;
+          }
+          
+          for (const key of keys) {
+            const ck = convertKey(key[0]);
+            if (key[1].length != 0) {
+              const cd = convertData(key[0], c[ck]);
+              if (!key[1].includes(cd)) {
+                return false;
+              }
+            }
+          }
+          
+          return true;
+        });
+      });
+      const csv2 = filter(csv);
+      
+      if (csv2.length) {
+        const names = Object.keys(charts);
+        names.forEach((name, index) => {
+          const convertName = convertKey(name);
+          const data = {};
+          for (const d of csv2) {
+            const v = convertData(name, d[convertName]);
+            if (!data[v]) {
+              data[v] = 1;
+            } else {
+              data[v]++;
+            }
+          }
+          const data2 = sortData(name, data);
+          const chartPie = new ChartPie(data2);
+          chartPie.id = "chart-pie" + index;
+          const chartBar = new ChartBar(data2);
+          chartBar.id = "chart-bar" + index;
+          const div2 = document.createElement("div");
+          div2.style.display = "inline-block";
+          const span = document.createElement("span");
+          span.textContent = name + ` (${csv2.length}件)`;
+          const chartSelect = document.createElement("select");
+          chartSelect.onchange = onChangeChartSelect.bind(null, name, index);
+          for (const key in chartType) {
+            const opt = document.createElement("option");
+            opt.textContent = chartType[key];
+            if (charts[name]["type"] == chartType[key]) {
+              opt.selected = true;
+            }
+            chartSelect.appendChild(opt);
+          };
+          span.appendChild(document.createElement("br"));
+          span.appendChild(chartSelect);
+          div2.appendChild(span);
+          div2.appendChild(document.createElement("br"));
+          div2.appendChild(chartPie);
+          div2.appendChild(chartBar);
+          divpie.append(div2);
+          changeChart(name, index);
+        });
+        
+      };
+    };
+
+    const addElementToBox = (box, sel, parent) => {
+      switch (sel) {
+        case "都道府県":
+        const input = parent.querySelectorAll("select")[0];
+        
+        const allButton = document.createElement("button");
+        allButton.textContent = "全国";
+        allButton.onclick = (event) => {
+          input.querySelectorAll("option").forEach(o => {
+            o.selected = false;
+          });
+          input.onchange();
+        };
+        
+        const inButton = document.createElement("button");
+        inButton.textContent = "福井県内";
+        inButton.onclick = (event) => {
+          input.querySelectorAll("option").forEach(o => {
+            if (o.value == "福井県") {
+              o.selected = true;
+              return;
+            }
+            
+            o.selected = false;
+          });
+          input.onchange();
+        };
+        
+        const outButton = document.createElement("button");
+        outButton.textContent = "福井県外";
+        outButton.onclick = () => {
+          input.querySelectorAll("option").forEach(o => {
+            if (o.value == "福井県" || !o.value) {
+              o.selected = false;
+              return;
+            }
+            
+            o.selected = true;
+          });
+          input.onchange();
+        };
+        
+        box.appendChild(allButton);
+        box.appendChild(inButton);
+        box.appendChild(outButton);
+        break;
+        
+        default:
+        break;
+      }
+    };
+    
+    const sels = Object.keys(surveys);
+    for (const sel of sels) {
+      const box = document.createElement("span");
+      box.style.display = "inline-block";
+      const txt = document.createElement("span");
+      txt.textContent = sel;
+      box.appendChild(txt);
+      box.appendChild(document.createElement("br"));
+      const s = document.createElement("select");
+      s.setAttribute("multiple", true);
+      s.appendChild(document.createElement("option"));
+      const names = sortSelectCodes(sel, Object.keys(surveys[sel].selectCode));
+      names.forEach(name => {
+        if (!name) {
+          return;
+        }
+        const opt = document.createElement("option");
+        opt.textContent = name;
+        s.appendChild(opt);
+      });
+      box.appendChild(s);
+      addElementToBox(prefbox, sel, box);
+      divsels.appendChild(box);
+      s.dataname = sel;
+      s.onchange = show;
+    }
+    
+    divsels.appendChild(document.createElement("br"));
+    
+    const from = dayjs("2022/10/1");
+    const to = dayjs();
+    surveySelector.createDateInputElement(divsels, {
+      title: "開始日",
+      elementId: "fromDate",
+      date: from.format("YYYY-MM-DD"),
+      onChange: show
+    });
+    surveySelector.createDateInputElement(divsels, {
+      title: "終了日",
+      elementId: "toDate",
+      date: to.format("YYYY-MM-DD"),
+      onChange: show
+    });
+    
+    show();
+  });
+  
+</script>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+  }
+  textarea {
+    width: 70vw;
+    height: 8em;
+  }
+  #divsels {
+    margin-bottom: .5em;
+  }
+  #prefbox > * {
+    margin: .5em .2em;
+  }
+</style>
