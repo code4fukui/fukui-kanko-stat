@@ -1,0 +1,248 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>福井県好感度ランキング（データ出典：福井県観光連盟）</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
+</head><body>
+  <h1 id="title"></h1>
+  <div id="opt">
+    <div id="divsels"></div>
+    <input id="mincount" value="3" step="1" type="number">件以上のみ有効
+    <span>合計<span id="spansum">-</span>件 (福井県内での交通手段の満足度・満足度・不便さ・NPS・今後の来訪意向にスコアを設定し、各スコアの合計値の平均を算出)
+  </div>      
+  <div id=main></div>
+  <hr />
+  <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
+  (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+</div>
+
+<script type="module">
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  import {} from "./header.js";
+  import { SurveySelector } from "./survey-selector.js";
+  
+  // iOS14以前に関する対応（top-level await未対応のため）
+  addEventListener("load", async () => {
+    title.textContent = document.title;
+    const surveySelector = new SurveySelector();
+    
+    //const url = "./fukui-answer.csv";
+    const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+    const data = await CSV.fetch(url);
+    const csv = await CSV.toJSON(data);
+    const scoreList = {
+      "福井県内での交通手段の満足度": {
+        "とても満足": 10,
+        "満足": 8,
+        "どちらでもない": 4,
+        "不満": 2,
+        "とても不満": 0
+      },
+
+      "満足度": {
+        "とても満足": 10,
+        "満足": 8,
+        "どちらでもない": 4,
+        "不満": 2,
+        "とても不満": 0
+      },
+
+      "不便さ": {
+        "感じなかった": 10,
+        "感じた": 0
+      },
+
+      "NPS": {
+        "10": 10,
+        "9": 9,
+        "8": 8,
+        "7": 7,
+        "6": 6,
+        "5": 5,
+        "4": 4,
+        "3": 3,
+        "2": 2,
+        "1": 1,
+        "0": 0
+      },
+
+      "今後の来訪意向": {
+        "また行きたい（1年以内）": 10,
+        "機会があれば行きたい": 8,
+        "どちらともいえない":  4,
+        "あまり行きたいと思わない": 2,
+        "行きたくない": 0
+      },
+    }
+    
+    const show = () => {
+      main.innerHTML = "";
+      
+      const filter = ((data) => {
+        const fromDate = surveySelector.getFromDate();
+        const toDate = surveySelector.getToDate();
+        
+        return data.filter(d => {
+          const answerDate = dayjs(d["回答日時"]).hour(0).minute(0).second(0);
+          if (answerDate < fromDate || answerDate > toDate ) {
+            return false;
+          }
+          
+          return true;
+        });
+      });
+      
+      const csv2 = filter(csv);
+      if (csv2.length) {
+        const favourableScore = {};
+        // const trafficValues = Object.values(scoreList["福井県内での交通手段の満足度"]);
+        // const trafficAverage = trafficValues.reduce((sum, v) => {
+        //   return sum + v;
+        // }) / trafficValues.length;
+        // const satisfactionValues = Object.values(scoreList["満足度"]);
+        // const satisfactionAverage = satisfactionValues.reduce((sum, v) => {
+        //   return sum + v;
+        // }) / satisfactionValues.length;
+        // const inconvenienceValues = Object.values(scoreList["不便さ"]);
+        // const inconvenienceAverage = inconvenienceValues.reduce((sum, v) => {
+        //   return sum + v;
+        // }) / inconvenienceValues.length;
+        // const npsValues = Object.values(scoreList["NPS"]);
+        // const npsAverage = npsValues.reduce((sum, v) => {
+        //   return sum + v;
+        // }) / npsValues.length;
+        // const visitValues = Object.values(scoreList["今後の来訪意向"]);
+        // const visitAverage = visitValues.reduce((sum, v) => {
+        //   return sum + v;
+        // }) / visitValues.length;
+        const trafficAverage = 10;
+        const satisfactionAverage = 10;
+        const inconvenienceAverage = 10;
+        const npsAverage = 10;
+        const visitAverage = 10;
+        csv2.forEach((c) => {
+          if (!favourableScore[c["都道府県"]]) {
+            favourableScore[c["都道府県"]] = {
+              count: 0,
+              traffic: 0,
+              satisfaction: 0,
+              inconvenience: 0,
+              nps: 0,
+              visit: 0
+            }
+          }
+
+          favourableScore[c["都道府県"]].count++;
+          favourableScore[c["都道府県"]].traffic += scoreList["福井県内での交通手段の満足度"][c["福井県内での交通手段の満足度"]] || trafficAverage;
+          favourableScore[c["都道府県"]].satisfaction += scoreList["満足度"][c["満足度"]] || satisfactionAverage;
+          favourableScore[c["都道府県"]].inconvenience += scoreList["不便さ"][c["不便さ"]] || inconvenienceAverage;
+          favourableScore[c["都道府県"]].nps += scoreList["NPS"][c["NPS"]] || npsAverage;
+          favourableScore[c["都道府県"]].visit += scoreList["今後の来訪意向"][c["今後の来訪意向"]] || visitAverage;
+        });
+
+        const favourableScore2 = [];
+        Object.keys(favourableScore).forEach((key) => {
+          const obj = {
+            pref: key,
+            count: favourableScore[key].count,
+            trafficAverage: favourableScore[key].traffic / favourableScore[key].count,
+            satisfactionAverage: favourableScore[key].satisfaction / favourableScore[key].count,
+            inconvenienceAverage: favourableScore[key].inconvenience / favourableScore[key].count,
+            npsAverage: favourableScore[key].nps / favourableScore[key].count,
+            visitAverage: favourableScore[key].visit / favourableScore[key].count,
+          };
+          obj.total = obj.trafficAverage + obj.satisfactionAverage + obj.inconvenienceAverage + obj.npsAverage + obj.visitAverage;
+          favourableScore2.push(obj);
+        });
+
+        const html = [];
+        let totalCount = 0;
+        favourableScore2.filter((fs) => {
+          const minCountElement = document.getElementById("mincount");
+          return fs.count >= minCountElement.value;
+        }).sort((fs1, fs2) => {
+          if (fs1.total < fs2.total) {
+            return 1;
+          }
+          if (fs1.total > fs2.total) {
+            return -1;
+          }
+          return 0;
+        }).forEach((fs, index) => {
+          totalCount += fs.count;
+          html.push(`<div class='comment'><span class=rank>${index + 1}位</span> <span class=point>${fs.total.toFixed(2)}ポイント</span>(<span class=count>${fs.count}</span>件) <span class=area>${fs.pref}</span></div>`);
+        });
+
+        const totalCountElement = document.getElementById("spansum");
+        totalCountElement.textContent = totalCount;
+
+          const div = document.createElement("div");
+          div.innerHTML = html.join("\n");
+          main.appendChild(div);
+      }
+    };
+
+    const from = dayjs().subtract(1, "year");
+    const to = dayjs();
+    surveySelector.createDateInputElement(divsels, {
+      title: "開始日",
+      elementId: "fromDate",
+      date: from.format("YYYY-MM-DD"),
+      onChange: show
+    });
+    surveySelector.createDateInputElement(divsels, {
+      title: "終了日",
+      elementId: "toDate",
+      date: to.format("YYYY-MM-DD"),
+      onChange: show
+    });
+
+    const minCountElement = document.getElementById("mincount");
+    minCountElement.onchange = (event) => {
+      show();
+    };
+    
+    show();
+  });
+  
+</script>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+  }
+  textarea {
+    width: 70vw;
+    height: 8em;
+  }
+  #divsels {
+    margin-bottom: .5em;
+  }
+  #prefbox > * {
+    margin: .5em .2em;
+  }
+  #main {
+        text-align: center;
+        border: 3px solid #555;
+        padding: .5em;
+      }
+      .rank {
+        font-size: 200%;
+        font-weight: bold;
+      }
+      .point {
+        font-size: 150%;
+      }
+      .area {
+        font-size: 150%;
+        font-weight: bold;
+      }
+      #main div {
+        text-align: left;
+      }
+      input, label, select {
+        font-size: 14px;
+      }
+      #credit {
+        text-align: center;
+      }
+</style>
