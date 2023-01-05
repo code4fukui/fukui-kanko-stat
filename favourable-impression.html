@@ -131,11 +131,11 @@
           }
 
           favourableScore[c["都道府県"]].count++;
-          favourableScore[c["都道府県"]].traffic += scoreList["福井県内での交通手段の満足度"][c["福井県内での交通手段の満足度"]] || trafficAverage;
-          favourableScore[c["都道府県"]].satisfaction += scoreList["満足度"][c["満足度"]] || satisfactionAverage;
-          favourableScore[c["都道府県"]].inconvenience += scoreList["不便さ"][c["不便さ"]] || inconvenienceAverage;
-          favourableScore[c["都道府県"]].nps += scoreList["NPS"][c["NPS"]] || npsAverage;
-          favourableScore[c["都道府県"]].visit += scoreList["今後の来訪意向"][c["今後の来訪意向"]] || visitAverage;
+          favourableScore[c["都道府県"]].traffic += scoreList["福井県内での交通手段の満足度"][c["福井県内での交通手段の満足度"]] != undefined ? scoreList["福井県内での交通手段の満足度"][c["福井県内での交通手段の満足度"]] : trafficAverage;
+          favourableScore[c["都道府県"]].satisfaction += scoreList["満足度"][c["満足度"]] != undefined ? scoreList["満足度"][c["満足度"]] : satisfactionAverage;
+          favourableScore[c["都道府県"]].inconvenience += scoreList["不便さ"][c["不便さ"]] != undefined ? scoreList["不便さ"][c["不便さ"]] : inconvenienceAverage;
+          favourableScore[c["都道府県"]].nps += scoreList["NPS"][c["NPS"]] != undefined ? scoreList["NPS"][c["NPS"]] : npsAverage;
+          favourableScore[c["都道府県"]].visit += scoreList["今後の来訪意向"][c["今後の来訪意向"]] != undefined ? scoreList["今後の来訪意向"][c["今後の来訪意向"]] : visitAverage;
         });
 
         const favourableScore2 = [];
