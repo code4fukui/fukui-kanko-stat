@@ -63,6 +63,7 @@
       let bkkw = null;
       const show = (kw) => {
         kw = kw || bkkw;
+        bkkw = kw;
         location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
         main.innerHTML = "";
         const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
@@ -87,7 +88,6 @@
           }
           
           const ngoodbad = sgoodbad.indexOf(d.満足度);
-          sumgoodbad[ngoodbad].value++;
           const ngoodbad2 = sgoodbad.indexOf(d.今後の来訪意向);
           
           const comment = d.満足度の理由;
@@ -98,6 +98,7 @@
           if (comment.indexOf(kw) == -1 && comment2.indexOf(kw) == -1) {
             continue;
           }
+          sumgoodbad[ngoodbad].value++;
 
           const goodbad = ["good", "good", "notbad", "bad", "bad"][ngoodbad];
           s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
@@ -160,6 +161,9 @@
     }
     header input {
       width: 80vw;
+      margin-top: .3em;
+      padding: .5em;
+      font-size: 16px;
     }
     h1 {
       padding: 0;
