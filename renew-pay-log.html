@@ -1,0 +1,213 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>RENEW Pay 決済連携情報（データ出典：株式会社ふくいのデジタル＆ふくいドットコム 福井県観光データ分析システム FTAS、福井県観光連盟）</title>
+</head><body>
+  <div id="overlay" class="menu-event"></div>
+  <h1 id=title></h1>
+  <table id="renew-pay-table"></table>
+  <nav id="nav-table">
+    詳細
+    <hr>
+    <table id="detail-table"></table>
+  </nav>
+  <hr />
+  <a href=https://code4fukui.github.io/opendata_fukui/renewpay_payment_linked_2022.csv>Renew Pay決済CSVデータ</a>
+  <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>アンケートCSVデータ</a>
+  (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+</div>
+
+<script type="module">
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  import {} from "./header.js";
+  
+  // iOS14以前に関する対応（top-level await未対応のため）
+  addEventListener("load", async () => {
+    title.textContent = document.title;
+    
+    const renewPayUrl = "https://code4fukui.github.io/opendata_fukui/renewpay_payment_linked_2022.csv";
+    const renewPayData = await CSV.fetch(renewPayUrl);
+    const renewPayCsv = await CSV.toJSON(renewPayData);
+    
+    const surveyUrl = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+    const surveyData = await CSV.fetch(surveyUrl);
+    const surveyCsv = await CSV.toJSON(surveyData).reduce((obj, d) => {
+      obj[d["会員ID"]] = d;
+      return obj;
+    }, {});
+    const surveyIds = Object.keys(surveyCsv);
+    
+    const renewPayIndex = [
+    "都道府県",
+    "市区町村",
+    "年齢",
+    "性別",
+    "商品券決済日時",
+    "商品券決済場所",
+    "商品券決済金額",
+    ];
+    const renewPayTableElement = document.getElementById("renew-pay-table");
+    
+    const navTable = document.getElementById("nav-table"); 
+    const overlay = document.getElementById("overlay");
+    
+    const toggleNav = () => {
+      navTable.classList.toggle('nav-menu-open');
+      overlay.classList.toggle('overlay-on');
+    };
+    
+    overlay.onclick = (event) => {
+      toggleNav();
+    };
+    
+    const onClickTableHeader = (event) => {
+      showTable(event.target.textContent);
+    };
+    
+    const numberSortTarget = [
+    "年齢",
+    "商品券決済金額"
+    ];
+    let beforeSortTarget = "";
+    let sortVec = 1;
+    const showTable = (sortTarget) => {
+      renewPayTableElement.innerHTML = "";
+      
+      const indexTr = document.createElement("tr");
+      const idTh = document.createElement("th");
+      idTh.textContent = "会員ID";
+      idTh.onclick = onClickTableHeader;
+      indexTr.append(idTh);
+      renewPayTableElement.append(indexTr);
+      renewPayIndex.forEach((rpi) => {
+        const th = document.createElement("th");
+        th.textContent = rpi;
+        th.onclick = onClickTableHeader;
+        indexTr.append(th);
+      });
+      renewPayTableElement.append(indexTr);
+      
+      sortVec = beforeSortTarget == sortTarget ? sortVec * -1 : 1;
+      renewPayCsv.sort((v1, v2) => {
+        const sv1 = numberSortTarget.includes(sortTarget) ? Number(v1[sortTarget]) : v1[sortTarget];
+        const sv2 = numberSortTarget.includes(sortTarget) ? Number(v2[sortTarget]) : v2[sortTarget];
+        if (sv1 < sv2) {
+          return sortVec * -1;
+        }
+        if (sv1 > sv2) {
+          return sortVec;
+        }
+        return 0;
+      }).forEach((rpc) => {
+        const tr = document.createElement("tr");
+        const idTd = document.createElement("td");
+        idTd.textContent = rpc["会員ID"];
+        if (surveyIds.includes(rpc["会員ID"])) {
+          idTd.classList.add("detail");
+          idTd.onclick = (event) => {
+            const detailTable = document.getElementById("detail-table");
+            detailTable.innerHTML = "";
+            const detail = surveyCsv[event.target.textContent];
+            Object.keys(detail).forEach((key) => {
+              const tr = document.createElement("tr");
+              const th = document.createElement("th");
+              th.textContent = key;
+              const td = document.createElement("td");
+              td.textContent = detail[key];
+              tr.append(th);
+              tr.append(td);
+              detailTable.append(tr);
+            });
+            toggleNav();
+          };
+        }
+        tr.append(idTd);
+        renewPayIndex.forEach((rpi) => {
+          const td = document.createElement("td");
+          td.textContent = rpc[rpi];
+          tr.append(td);
+        });
+        renewPayTableElement.append(tr);
+        beforeSortTarget = sortTarget;
+      });
+    };
+    
+    showTable("会員ID");
+  });
+  
+</script>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+  }
+  textarea {
+    width: 70vw;
+    height: 8em;
+  }
+  
+  #nav-table {
+    position: fixed;
+    z-index: 20;
+    top: 0px;
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background-color: #fff;
+    border-left: solid 1px #ddd;
+    transition: all 0.5s ease-out;
+    overflow: scroll;
+  }
+  
+  #nav-table.nav-menu-open {
+    right: 0;
+  }
+  
+  table {
+    border-collapse: collapse;
+    text-align: left;
+    width: 95%;
+    margin: 0px auto 8px auto;
+  }
+  
+  th, td {
+    border: 1px solid;
+    padding: .2em .4em;
+  }
+  
+  th {
+    background-color: #DDDDDD;
+    text-align: left;
+  }
+  
+  td {
+    text-align: left;
+  }
+  
+  #renew-pay-table th {
+    cursor: pointer;
+  }
+  
+  #renew-pay-table td.detail {
+    color: #0000FF;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  #overlay {
+    position: fixed;
+    top:0;
+    z-index: 10;
+    width: 100vw;
+    height: 100vh;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(0,0,0,0.6);
+    transition: all 0.5s ease-out;
+  }
+  
+  #overlay.overlay-on {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
+</body></html>
