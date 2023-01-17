@@ -10,8 +10,8 @@ addEventListener("load", async () => {
   };
   
   //const base = location.href.indexOf("[::]") >= 0 ? "./" : "https://code4fukui.github.io/fukui-kanko-stat/";
-  // const base = "https://code4fukui.github.io/fukui-kanko-stat/";
-  const base = "./";
+  const base = "https://code4fukui.github.io/fukui-kanko-stat/";
+  // const base = "./";
   
   const url = base + "data/apps.csv";
   const smenu = await CSV.fetchJSON(url);
