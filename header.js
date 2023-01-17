@@ -22,16 +22,41 @@ addEventListener("load", async () => {
   css.href = base + "style.css";
   document.head.appendChild(css);
   
-  const menu = document.createElement("ul");
-  menu.className = "menu";
+  const navButtonElement = document.createElement("div");
+  navButtonElement.id = "nav-button";
+  navButtonElement.textContent = "≡";
+  insertFirst(document.body, navButtonElement);
+  
+  const navElement = document.createElement("nav");
+  navElement.id = "sitemap-menu";
+  const menuTitleElement = document.createElement("h3");
+  menuTitleElement.textContent = "サイトマップ";
+  navElement.appendChild(menuTitleElement);
+  navElement.appendChild(document.createElement("hr"));
+  const menuElement = document.createElement("ul");
+  navElement.appendChild(menuElement);
   for (const s of smenu) {
     const li = document.createElement("li");
     li.textContent = s.name;
     li.onclick = () => location.href = s.url;
-    li.style.display = "inline-block";
-    li.style.listStyle = "none";
-    li.style.margin = ".2em 2em";
-    menu.appendChild(li);
+    menuElement.appendChild(li);
   }
-  insertFirst(document.body, menu);
+  insertFirst(document.body, navElement);
+  
+  const headerOverlayElement = document.createElement("div");
+  headerOverlayElement.id = "header-overlay";
+  insertFirst(document.body, headerOverlayElement);
+  
+  const toggleNav = () => {
+    navElement.classList.toggle('menu-open');
+    headerOverlayElement.classList.toggle('overlay-on');
+  };
+  
+  headerOverlayElement.onclick = (_) => {
+    toggleNav();
+  };
+  
+  navButtonElement.onclick = (_) => {
+    toggleNav();
+  };
 });
