@@ -258,7 +258,7 @@ class SurveySelector {
     }
   }
   
-  createSelectElement(divsels, csv, show, fromDate, toDate) {
+  createSelectElement(divsels, csv, show, option = {}) {
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -340,19 +340,23 @@ class SurveySelector {
     
     divsels.appendChild(document.createElement("br"));
     
-    const from = !fromDate ? dayjs().subtract(1, "months") : dayjs(fromDate);
-    const to = !toDate ? dayjs() : dayjs(toDate);
+    const from = !option["fromDate"] ? dayjs().subtract(1, "months") : dayjs(option["fromDate"]);
+    const to = !option["toDate"] ? dayjs() : dayjs(option["toDate"]);
     this.createDateInputElement(divsels, {
       title: "開始日",
       elementId: "fromDate",
       date: from.format("YYYY-MM-DD"),
-      onChange: show
+      onChange: show,
+      min: option["minFromDate"],
+      max: option["maxFromDate"]
     });
     this.createDateInputElement(divsels, {
       title: "終了日",
       elementId: "toDate",
       date: to.format("YYYY-MM-DD"),
-      onChange: show
+      onChange: show,
+      min: option["minToDate"],
+      max: option["maxToDate"]
     });
   }
   
@@ -366,6 +370,12 @@ class SurveySelector {
     const dateInputElement = document.createElement("input");
     dateInputElement.setAttribute("id", option["elementId"]);
     dateInputElement.setAttribute("type", "date");
+    if (option["min"]) {
+      dateInputElement.setAttribute("min", option["min"]);
+    }
+    if (option["max"]) {
+      dateInputElement.setAttribute("max", option["max"]);
+    }
     dateInputElement.value = option["date"];
     if (option["onChange"]) {
       dateInputElement.onchange = option["onChange"];

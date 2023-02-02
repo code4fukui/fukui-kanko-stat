@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+  <title>Instagramハッシュタグ相関調査（データ出典：福井県観光連盟）</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
+</head><body>
+  <h1 id=title></h1>
+  ハッシュタグ：<select id=selhashtag></select><br>
+  <div id=prefbox></div>
+  <div id=divsels></div>
+  <div id=divpie></div>
+  <hr />
+  <a href="https://github.com/code4fukui/fukui-kanko-hashtag" target="_blank">福井県観光ハッシュタグ別投稿数 CSVデータ</a> (<a href="https://github.com/code4fukui/copyright-policy-jp/tree/main/OpenDataStandardTermsofUse" target="_blank">オープンデータ標準利用規約</a>) <a href="https://www.fuku-e.com/" target="_blank">福井県観光連盟</a><br>
+  <a href="https://code4fukui.github.io/fukui-kanko-survey/all.csv" target="_blank">アンケート CSVデータ</a> (<a href="https://github.com/code4fukui/fukui-kanko-survey" target="_blank">data on GitHub</a>)<br/>
+  <a href="https://github.com/code4fukui/fukui-kanko-stat/" target="_blank">src on GitHub by Code for FUKUI</a><br>
+</div>
+
+<script type="module">
+  import "https://cdn.plot.ly/plotly-2.15.1.min.js";
+  import { CSV } from "https://js.sabae.cc/CSV.js";
+  import {} from "./header.js";
+  import { SurveySelector } from "./survey-selector.js";
+  import { addComma } from "https://js.sabae.cc/addComma.js";
+  
+  // iOS14以前に関する対応（top-level await未対応のため）
+  addEventListener("load", async () => {
+    title.textContent = document.title;
+    const surveySelector = new SurveySelector();
+    
+    //const url = "./fukui-answer.csv";
+    const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+    const data = await CSV.fetch(url);
+    const csv = await CSV.toJSON(data);
+    
+    const fns = [
+    "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202204.csv",
+    "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202205.csv",
+    "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202206.csv",
+    "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202207.csv",
+    "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202208.csv",
+    ];
+    
+    const hashtags = {};
+    for (const fn of fns) {
+      const data = await CSV.fetchJSON(fn);
+      for (const d of data) {
+        const hashtag = d.hashtag;
+        const cnts = (() => {
+          const h = hashtags[hashtag];
+          if (h) {
+            return h;
+          }
+          return hashtags[hashtag] = [];
+        })();
+        for (const name in d) {
+          if (name == "hashtag") {
+            continue;
+          }
+          const value = parseInt(d[name]);
+          cnts.push({ name: name, value });
+        }
+      }
+    }
+    
+    for (const name in hashtags) {
+      const data = hashtags[name];
+      const sum = data.reduce((pre, cur) => pre + cur.value, 0);
+      if (sum < 100) {
+        continue;
+      }
+      const opt = document.createElement("option");
+      opt.textContent = name + " (" + addComma(sum) + "件)";
+      opt.value = name;
+      selhashtag.appendChild(opt);
+    }
+    
+    const sortData = (key, obj) => {
+      const names = surveySelector.sortSelectCodes(key, Object.keys(obj));
+      const res = {};
+      for (const name of names) {
+        res[name] = obj[name];
+      }
+      return res;
+    };
+    
+    const show = () => {
+      divpie.innerHTML = "";
+      const csv2 = surveySelector.filter(csv);
+      
+      if (csv2.length) {
+        const showhashtag = selhashtag.value;
+        const fromDate = surveySelector.getFromDate();
+        const toDate = surveySelector.getToDate();
+        const baseLineData = hashtags[showhashtag].filter((d) => {
+          const baseDate = dayjs(d["name"]).hour(0).minute(0).second(0);
+          return (baseDate >= fromDate && baseDate <= toDate);
+        });
+        
+        const labels = baseLineData.map((d) => {
+          return d["name"];
+        });
+        const values = baseLineData.map((d) => {
+          return d["value"];
+        });
+        
+        const chartDatas = [];
+        const lineData = {
+          type: "scatter",
+          mode: "lines",
+          name: showhashtag,
+          x: labels,
+          y: values,
+          line: {
+            width: 3
+          },
+          showlegend: true
+        };
+        
+        const baseBarData = {};
+        for (const d of csv2) {
+          const v = d["回答日時"].split(" ")[0];
+          if (!baseBarData[v]) {
+            baseBarData[v] = 1;
+          } else {
+            baseBarData[v]++;
+          }
+        }
+        
+        const barData = {
+          type: "bar",
+          name: "アンケート回答数",
+          x: Object.keys(baseBarData),
+          y: Object.values(baseBarData),
+          showlegend: true,
+          yaxis: "y2"
+        };
+        
+        const layout = {
+          xaxis: {
+            type: "date",
+            tickformat: "%Y/%m/%d",
+            automargin: true
+          },
+          yaxis: {
+            range: [0, Math.max(...lineData["y"])],
+            exponentformat: "none",
+            automargin: true,
+            side: "left",
+            title: showhashtag,
+            overlaying: 'y2'
+          },
+          
+          yaxis2: {
+            range: [0, Math.max(...barData["y"])],
+            exponentformat: "none",
+            automargin: true,
+            side: "right",
+            title: "アンケート回答数"
+          }
+        };
+        
+        Plotly.newPlot(divpie, [lineData, barData], layout, {
+          showSendToCloud: true
+        });
+      }
+    };
+    
+    surveySelector.createSelectElement(divsels, csv, show, {
+      fromDate: "2022-04-01",
+      minFromDate: "2022-04-01",
+      maxFromDate: "2022-08-31",
+      toDate: "2022-08-31",
+      minToDate: "2022-04-01",
+      maxToDate: "2022-08-31"
+    });
+    
+    selhashtag.onchange = (_) => {
+      show();
+    };
+    
+    show();
+  });
+  
+</script>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+  }
+  textarea {
+    width: 70vw;
+    height: 8em;
+  }
+  #divsels {
+    margin-bottom: .5em;
+  }
+  #prefbox > * {
+    margin: .5em .2em;
+  }
+</style>
