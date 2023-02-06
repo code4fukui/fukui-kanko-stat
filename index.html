@@ -17,6 +17,9 @@
   import { CSV } from "https://js.sabae.cc/CSV.js";
   import {} from "./header.js";
   import { SurveySelector } from "./survey-selector.js";
+
+  const CHART_INDEX_SINGLE = "single";
+  const CHART_INDEX_MULTI = "multi";
   
   // iOS14以前に関する対応（top-level await未対応のため）
   addEventListener("load", async () => {
@@ -39,43 +42,66 @@
     // 各チャートの情報
     let charts = {
       "都道府県": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "年代": {
-        type: chartType["bar"]
+        type: chartType["bar"],
+        index: CHART_INDEX_SINGLE
       },
       "性別": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "6分類": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "回答エリア2": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "世帯年収": {
-        type: chartType["bar"]
+        type: chartType["bar"],
+        index: CHART_INDEX_SINGLE
       },
       "回答月": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "満足度": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "不便さ": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "NPS": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "宿泊数（県内）": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "今後の来訪意向": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
       },
       "同行者": {
-        type: chartType["pie"]
+        type: chartType["pie"],
+        index: CHART_INDEX_SINGLE
+      },
+      "訪問目的": {
+        type: chartType["pie"],
+        index: CHART_INDEX_MULTI,
+        delimiter: "\n"
+      },
+      "情報収集": {
+        type: chartType["pie"],
+        index: CHART_INDEX_MULTI,
+        delimiter: "\n"
       }
     };
     
@@ -120,14 +146,36 @@
         const names = Object.keys(charts);
         names.forEach((name, index) => {
           const data = {};
-          for (const d of csv2) {
-            surveySelector.convertData(name, d);
-            const v = d[name];
-            if (!data[v]) {
-              data[v] = 1;
-            } else {
-              data[v]++;
-            }
+
+          switch (charts[name].index) {
+            case CHART_INDEX_SINGLE:
+              for (const d of csv2) {
+                surveySelector.convertData(name, d);
+                const v = d[name];
+                if (!data[v]) {
+                  data[v] = 1;
+                } else {
+                  data[v]++;
+                }
+              }
+              break;
+
+            case CHART_INDEX_MULTI:
+              for (const d of csv2) {
+                const values = d[`${name}ALL`].split(charts[name].delimiter);
+                for (const v of values) {
+                  if (!v) {
+                    continue;
+                  }
+
+                  if (!data[v]) {
+                    data[v] = 1;
+                  } else {
+                    data[v]++;
+                  }
+                }
+              }
+              break;
           }
           const data2 = sortData(name, data);
           const chartPie = new ChartPie(data2);
@@ -137,7 +185,8 @@
           const div2 = document.createElement("div");
           div2.style.display = "inline-block";
           const span = document.createElement("span");
-          span.textContent = name + ` (${csv2.length}件)`;
+          const chartTitle = charts[name].index == CHART_INDEX_MULTI ? `${name}（複数回答あり）` : name;
+          span.textContent = chartTitle + ` (${csv2.length}件)`;
           const chartSelect = document.createElement("select");
           chartSelect.onchange = onChangeChartSelect.bind(null, name, index);
           for (const key in chartType) {
