@@ -94,9 +94,14 @@
             }
           }
           const data2 = sortData(name, data);
-          const chartPie = new ChartPie(data2);
+          const option = {};
+          if (window.innerWidth <= 480) {
+            option.width = window.innerWidth - 8;
+            option.showlegend = false;
+          }
+          const chartPie = new ChartPie(data2, option);
           chartPie.id = "chart-pie" + index;
-          const chartBar = new ChartBar(data2);
+          const chartBar = new ChartBar(data2, option);
           chartBar.id = "chart-bar" + index;
           const div2 = document.createElement("div");
           div2.style.display = "inline-block";
@@ -148,9 +153,10 @@
           }
         }
         
+        const sankeyMargin = window.innerWidth <= 480 ? 8 : 50;
         const sankey = new ChartSankey(rows, {
           title: "相関関係",
-          width: window.innerWidth - 50,
+          width: window.innerWidth - sankeyMargin,
           height: 600
         });
         divpie.appendChild(sankey);
@@ -158,6 +164,11 @@
     };
     
     surveySelector.createSelectElement(divsels, csv, show);
+
+    window.onresize = (event) => {
+      show();
+    };
+
     show();
   });
   

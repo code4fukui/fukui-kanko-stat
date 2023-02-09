@@ -156,6 +156,14 @@
             title: "アンケート回答数"
           }
         };
+
+        if (window.innerWidth <= 480) {
+          layout.legend = {
+            orientation: "h",
+            x: 0,
+            y: -1
+          }
+        }
         
         Plotly.newPlot(divpie, [lineData, barData], layout, {
           showSendToCloud: true
@@ -173,6 +181,10 @@
     });
     
     selhashtag.onchange = (_) => {
+      show();
+    };
+
+    window.onresize = (event) => {
       show();
     };
     
