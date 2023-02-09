@@ -357,9 +357,14 @@
             }
           }
           const data2 = sortData(name, data);
-          const chartPie = new ChartPie(data2);
+          const option = {};
+          if (window.innerWidth <= 480) {
+            option.width = window.innerWidth - 8;
+            option.showlegend = false;
+          }
+          const chartPie = new ChartPie(data2, option);
           chartPie.id = "chart-pie" + index;
-          const chartBar = new ChartBar(data2);
+          const chartBar = new ChartBar(data2, option);
           chartBar.id = "chart-bar" + index;
           const div2 = document.createElement("div");
           div2.style.display = "inline-block";
@@ -483,6 +488,10 @@
       date: to.format("YYYY-MM-DD"),
       onChange: show
     });
+
+    window.onresize = (event) => {
+      show();
+    };
     
     show();
   });
