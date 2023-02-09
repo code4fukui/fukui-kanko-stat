@@ -79,9 +79,18 @@
             }
             
             const lineData = sortData(name, data);
-            const chartLine = new ChartLine(lineData, {
+            const option = {
               width: window.innerWidth - 64
-            });
+            };
+            if (window.innerWidth <= 480) {
+              option.width = window.innerWidth - 8;
+              option.legend = {
+                orientation: "h",
+                x: 0,
+                y: -1
+              }
+            }
+            const chartLine = new ChartLine(lineData, option);
             chartLine.id = "chart-line" + index;
             const div2 = document.createElement("div");
             div2.style.display = "inline-block";
@@ -97,6 +106,11 @@
       };
       
       surveySelector.createSelectElement(divsels, csv, show);
+
+      window.onresize = (event) => {
+        show();
+      };
+
       show();
     });
   </script>
