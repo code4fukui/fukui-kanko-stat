@@ -14,6 +14,7 @@
   <div id=qr>
     <select id=selarea><option>すべてのエリア</option></select>
     <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
+    <label><input id="chkbad" type="checkbox">厳しいコメント</label>
     <select id=selage><option>すべての年代</option></select>
   </div>
   
@@ -60,7 +61,7 @@
       }
       
       const show = () => {
-        location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
+        location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex + "," + (chkbad.checked ? 1 : 0);
         main.innerHTML = "";
         const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
         let cnt = 0;
@@ -90,21 +91,23 @@
           if (!comment) {
             continue;
           }
-          const goodbad = ["good", "good", "notbad", "bad", "bad"][ngoodbad];
-          s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
-          for (const n of names) {
-            if (filterarea && n == "回答エリア2") {
-              continue;
-            }
-            if (n == "会員ID") {
-              s.push(`${n}: <a href=detail.html#id=${d[n]}>${d[n]}</a>`);
-            } else {
-              s.push(`${n}: ${d[n]}`);
-            }
+          if (chkbad.checked && ngoodbad < 2) {
+            continue;
           }
-          s.push("<hr>");
-          if (cnt++ == nshow) {
-            break;
+          if (cnt++ < nshow) {
+            const goodbad = ["good", "good", "notbad", "bad", "bad"][ngoodbad];
+            s.push(`<div class='comment ${goodbad}''>${comment}</div>`);
+            for (const n of names) {
+              if (filterarea && n == "回答エリア2") {
+                continue;
+              }
+              if (n == "会員ID") {
+                s.push(`${n}: <a href=detail.html#id=${d[n]}>${d[n]}</a>`);
+              } else {
+                s.push(`${n}: ${d[n]}`);
+              }
+            }
+            s.push("<hr>");
           }
         }
         const chart = new ChartPie(sumgoodbad);
@@ -114,7 +117,7 @@
         main.appendChild(div);
       };
       if (location.hash.length > 1) {
-        const [narea, chk, nage] = location.hash.substring(1).split(",");
+        const [narea, chk, nage, chk2] = location.hash.substring(1).split(",");
         if (narea) {
           selarea.selectedIndex = narea;
         }
@@ -124,10 +127,13 @@
         if (nage) {
           selage.selectedIndex = nage;
         }
+        if (chk) {
+          chkbad.checked = chk2 == "1";
+        }
       }
       show();
       
-      selage.onchange = selarea.onchange = chkwithout.onchange = () => show();
+      selage.onchange = selarea.onchange = chkwithout.onchange = chkbad.onchange = () => show();
     });
   </script>
   
