@@ -340,8 +340,8 @@ class SurveySelector {
     
     divsels.appendChild(document.createElement("br"));
     
-    //const from = !option["fromDate"] ? dayjs().subtract(1, "months") : dayjs(option["fromDate"]);
-    const from = !option["fromDate"] ? dayjs("2022-04-01") : dayjs(option["fromDate"]);
+    const from = !option["fromDate"] ? dayjs().subtract(1, "months") : dayjs(option["fromDate"]);
+    //const from = !option["fromDate"] ? dayjs("2022-04-01") : dayjs(option["fromDate"]);
     const to = !option["toDate"] ? dayjs() : dayjs(option["toDate"]);
     this.createDateInputElement(divsels, {
       title: "開始日",
@@ -418,9 +418,9 @@ class SurveySelector {
     return csv.filter(c => {
       const answerDate = dayjs(c["回答日時"]).hour(0).minute(0).second(0);
       if (answerDate < fromDate || answerDate > toDate ) {
+      //if (answerDate.isBefore(fromDate) || answerDate.isAfter(toDate)) {
         return false;
       }
-      
       for (const key of keys) {
         if (key[1].length != 0) {
           this.convertData(key[0], c);
