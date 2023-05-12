@@ -30,7 +30,7 @@
           const r = res.find(r => r.name == d.toStringYMD());
           r.value++;
         }
-        res.filter(r => r.name = parseInt(r.name.substring(4, 6)) + "/" + parseInt(r.name.substring(6)));
+        res.filter(r => r.name = r.name.substring(0, 4) + "/" + parseInt(r.name.substring(4, 6)) + "/" + parseInt(r.name.substring(6)));
         console.log(res)
         return res;
       };
