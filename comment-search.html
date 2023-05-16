@@ -42,12 +42,13 @@
       const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
       const data = CSV.toJSON(await CSV.fetch(url));
       data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
-      const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
+      const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア)).sort();
       areas.forEach(a => {
         const opt = document.createElement("option");
         opt.textContent = a;
         selarea.appendChild(opt);
       });
+      console.log("areas", areas.sort());
       const getArea = () => {
         const v = selarea.value;
         return v == "すべてのエリア" ? 0 : parseInt(v);
@@ -66,7 +67,7 @@
         bkkw = kw;
         location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
         main.innerHTML = "";
-        const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア2".split(",");
+        const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア".split(",");
         let cnt = 0;
         const s = [];
         const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
@@ -79,7 +80,7 @@
             continue;
           }
           const filterarea = selarea.value != "すべてのエリア";
-          if (filterarea && d.回答エリア2 != selarea.value) {
+          if (filterarea && d.回答エリア != selarea.value) {
             continue;
           }
           const filterage = selage.value != "すべての年代";
@@ -105,7 +106,7 @@
           const goodbad2 = ["good", "notbad", "good", "bad", "notbad", "bad", "notbad"][ngoodbad2];
           s.push(`<div class='comment ${goodbad2}''>${comment2}</div>`);
           for (const n of names) {
-            if (filterarea && n == "回答エリア2") {
+            if (filterarea && n == "回答エリア") {
               continue;
             }
             if (n == "会員ID") {

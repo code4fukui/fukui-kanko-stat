@@ -87,7 +87,7 @@ class SurveySelector {
         "嶺南西部（小浜市以西）": 5
       }
     },
-    "回答エリア2": {
+    "回答エリア": {
     },
     "世帯年収": {
       selectCode: {
