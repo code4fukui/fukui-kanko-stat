@@ -13,7 +13,7 @@
   
   <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
   <div id=qr>
-    <select id=selarea><option>すべてのエリア</option></select>
+    <select id=selarea><option value="0">すべてのエリア</option></select>
     <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
     <select id=selage><option>すべての年代</option></select>
   </div>
@@ -30,29 +30,22 @@
     import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
     import { ChartPie } from "https://js.sabae.cc/Chart.js";
     import {} from "./header.js";
-    
+    import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
+
     addEventListener("load", async () => {
       const st = document.title;
       title.textContent = st.substring(0, st.indexOf("（"));
       subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
       
       const nshow = 1000;
-      
+
       //const url = "./fukui-answer.csv";
       const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
       const data = CSV.toJSON(await CSV.fetch(url));
       data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
-      const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア)).sort();
-      areas.forEach(a => {
-        const opt = document.createElement("option");
-        opt.textContent = a;
-        selarea.appendChild(opt);
-      });
-      console.log("areas", areas.sort());
-      const getArea = () => {
-        const v = selarea.value;
-        return v == "すべてのエリア" ? 0 : parseInt(v);
-      };
+
+      const areas = await fetchAreas();
+      setAreaSelect(areas, selarea);
       
       const ageopt = ["10歳未満", "10代", "20代", "30代", "40代", "50代", "60代", "70代", "80歳以上"];
       for (const age of ageopt) {
@@ -65,7 +58,7 @@
       const show = (kw) => {
         kw = kw || bkkw;
         bkkw = kw;
-        location.hash = getArea() + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
+        location.hash = selarea.value + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
         main.innerHTML = "";
         const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア".split(",");
         let cnt = 0;
@@ -79,8 +72,8 @@
           if (chkwithout.checked && d.都道府県 == "福井県") {
             continue;
           }
-          const filterarea = selarea.value != "すべてのエリア";
-          if (filterarea && d.回答エリア != selarea.value) {
+          const filterarea = selarea.value != 0;
+          if (filterarea && getAreaID(areas, d.回答エリア) != selarea.value) {
             continue;
           }
           const filterage = selage.value != "すべての年代";
@@ -129,7 +122,7 @@
       if (location.hash.length > 1) {
         const [narea, chk, nage] = location.hash.substring(1).split(",");
         if (narea) {
-          selarea.selectedIndex = narea;
+          selarea.value = narea;
         }
         if (chk) {
           chkwithout.checked = chk == "1";

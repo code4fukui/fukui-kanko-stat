@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
   <title>福井観光エリア満足度ランキング（データ出典：福井県観光連盟 福井県観光アンケートオープンデータ）</title>
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:image"  x-content="https://code4fukui.github.io/fukui-kanko-stat/comment.jpg">
@@ -32,6 +32,7 @@
       import { ChartPie } from "https://js.sabae.cc/Chart.js";
       import { JAPAN_PREF } from "https://js.sabae.cc/JAPAN_PREF.js";
       import {} from "./header.js";
+      import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
       
       addEventListener("load", async () => {
         const st = document.title;
@@ -42,7 +43,7 @@
         
         const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
         const data = CSV.toJSON(await CSV.fetch(url));
-        const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
+        const areas = await fetchAreas();
         
         for (const p of JAPAN_PREF) {
           const opt = document.createElement("option");
@@ -56,7 +57,7 @@
           let p = 0;
           let cnt = 0;
           for (const d of data) {
-            if (d.回答エリア2 != area) {
+            if (getAreaID(areas, d.回答エリア) != area.id) {
               continue;
             }
             const pref = selpref.value;
@@ -72,9 +73,7 @@
             p += ngoodbad;
             cnt++;
           }
-          const idx = parseInt(area);
-          const name = area.substring(area.indexOf(".") + 1)
-          const s = `<a target=_blank href=comment.html#${idx},0>${name}</a>`;
+          const s = `<a target=_blank href=comment.html#${area.id},0>${area.エリア名}</a>`;
           return { average: (p / cnt).toFixed(1), count: cnt, area: s };
         };
         
