@@ -13,7 +13,7 @@ export const getAreaID = (areas, name) => areas.find(a => name == a.エリア名
 export const setAreaSelect = (areas, selarea) => {
   areas.forEach(a => {
     const opt = document.createElement("option");
-    opt.textContent = a.エリア名;
+    opt.textContent = a.市町名 + " / " + a.エリア名;
     opt.value = a.id;
     selarea.appendChild(opt);
   });
