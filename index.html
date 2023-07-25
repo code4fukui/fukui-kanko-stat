@@ -17,14 +17,17 @@
   import { CSV } from "https://js.sabae.cc/CSV.js";
   import {} from "./header.js";
   import { SurveySelector } from "./survey-selector.js";
+  import { fetchAreas } from "./area.js";
 
   const CHART_INDEX_SINGLE = "single";
   const CHART_INDEX_MULTI = "multi";
   
   // iOS14以前に関する対応（top-level await未対応のため）
   addEventListener("load", async () => {
+    const areas = await fetchAreas();
+    
     title.textContent = document.title;
-    const surveySelector = new SurveySelector();
+    const surveySelector = new SurveySelector(areas);
     
     //const url = "./fukui-answer.csv";
     const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";

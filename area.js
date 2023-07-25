@@ -18,3 +18,24 @@ export const setAreaSelect = (areas, selarea) => {
     selarea.appendChild(opt);
   });
 };
+
+export const getLongAreaName = (areas, area) => {
+  const a = areas.find(a => a == エリア名 == area);
+  if (!a) {
+    return "- / " + area;
+  }
+  return a.市町名 + " / " + a.エリア名;
+};
+
+export const sortByAreaNumber = (areas, areanames) => {
+  const get = (name) => {
+    const n = areas.find(a => a.エリア名 == name)?.通し番号;
+    if (n == undefined) {
+      console.log(name); // ?
+      return 10000;
+    }
+    return parseInt(n);
+  };
+  areanames.sort((a, b) => get(a) - get(b));
+
+};

@@ -1,8 +1,12 @@
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/locale/ja.min.js";
+import { fetchAreas, sortByAreaNumber } from "./area.js";
 
 class SurveySelector {
+  constructor(areas) {
+    this.areas = areas;
+  }
   // 各チャートの情報
   surveys = {
     "都道府県": {
@@ -323,12 +327,21 @@ class SurveySelector {
       s.setAttribute("multiple", true);
       s.appendChild(document.createElement("option"));
       const names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
+      if (sel == "回答エリア") {
+        sortByAreaNumber(this.areas, names);
+      }
       names.forEach(name => {
         if (!name) {
           return;
         }
         const opt = document.createElement("option");
-        opt.textContent = name;
+        if (sel == "回答エリア") {
+          const city = csv.find(a => a.回答エリア == name)?.市町村;
+          opt.textContent = city + " / " + name;
+          opt.value = name;
+        } else {
+          opt.textContent = name;
+        }
         s.appendChild(opt);
       });
       box.appendChild(s);
