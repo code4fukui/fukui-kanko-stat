@@ -1,6 +1,8 @@
 name,url
 観光オープンデータ簡易分析,https://code4fukui.github.io/fukui-kanko-stat/
 観光オープンデータトレンド分析,https://code4fukui.github.io/fukui-kanko-stat/trend.html
+福井県観光AIアドバイス,https://code4fukui.github.io/fukui-kanko-advice/
+あわら温泉エリア 宿泊予約状況,https://code4fukui.github.io/fukui-kanko-reservation/
 回答数推移(日別),https://code4fukui.github.io/fukui-kanko-stat/daily.html
 コメントマップ,https://code4fukui.github.io/sightseeingApp/
 エリア満足度ランキング,https://code4fukui.github.io/fukui-kanko-stat/ranking.html
@@ -18,4 +20,3 @@ RENEW Pay決済連携データ,https://code4fukui.github.io/fukui-kanko-stat/ren
 福井県好感度ランキング,https://code4fukui.github.io/fukui-kanko-stat/favourable-impression.html
 福井県観光滞在時間,https://code4fukui.github.io/fukui-kanko-stat/length-of-stay.html
 Instagramハッシュタグ相関調査,https://code4fukui.github.io/fukui-kanko-stat/instagram-hash-tag.html
-福井県観光AIアドバイス,https://code4fukui.github.io/fukui-kanko-advice/
