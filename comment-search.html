@@ -31,6 +31,7 @@
     import { ChartPie } from "https://js.sabae.cc/Chart.js";
     import {} from "./header.js";
     import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
+    import { removeHash } from "https://js.sabae.cc/removeHash.js";
 
     addEventListener("load", async () => {
       const st = document.title;
@@ -54,11 +55,14 @@
         selage.appendChild(opt);
       }
       
-      let bkkw = null;
+      //let bkkw = null;
       const show = (kw) => {
-        kw = kw || bkkw;
-        bkkw = kw;
+        //kw = kw || bkkw;
+        //bkkw = kw;
         location.hash = selarea.value + "," + (chkwithout.checked ? 1 : 0) + "," + selage.selectedIndex;
+        if (location.hash == "#0,0,0") {
+          removeHash();
+        }
         main.innerHTML = "";
         const names = "会員ID,回答日時,満足度,NPS,都道府県,年代,性別,回答エリア".split(",");
         let cnt = 0;
@@ -89,8 +93,10 @@
           if (!comment && !comment2) {
             continue;
           }
-          if (comment.indexOf(kw) == -1 && comment2.indexOf(kw) == -1) {
-            continue;
+          if (kw) {
+            if (comment.indexOf(kw) == -1 && comment2.indexOf(kw) == -1) {
+              continue;
+            }
           }
           sumgoodbad[ngoodbad].value++;
 
@@ -131,15 +137,17 @@
           selage.selectedIndex = nage;
         }
       }
-      //show();
+      show();
       
       selage.onchange = selarea.onchange = chkwithout.onchange = () => show();
 
       keyword.onchange = () => {
         const kw = keyword.value.trim();
+        /*
         if (!kw) {
           return;
         }
+        */
         show(kw);
       };
     });
