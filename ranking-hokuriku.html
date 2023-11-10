@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>北陸観光満足度ランキング（出典：福井県と石川県の観光オープンデータ）</title>
+
+</head><body>
+<header>
+  <h1 id=title></h1>
+  <span id=subtitle></span>
+</header>
+
+<main>
+  <div id=opt>
+    <input id=daylimit value="60" size=3 type="text">日前から
+    <select id=selpref><option value="">すべての都道府県</option><option value="without">福井県外</option><select>からの観光客を対象に
+      <input id=mincount value="5" size=3 type="text">件以上のみ有効として、5段階の満足度を平均
+      （<span>合計<span id=spansum>-</span>件）
+    </div>
+    
+    <div id=main></div>
+  </main>
+  
+  <div id=credit>
+    出典: <a href=https://www.fuku-e.com/feature/detail_266.html>福井県観光データ分析システム「FTAS」｜特集｜【公式】福井県 観光/旅行サイト ｜ ふくいドットコム</a><br>
+    出典: <a href=https://sites.google.com/view/milli-ishikawa-pref/%E3%83%9B%E3%83%BC%E3%83%A0>Milli - 石川県観光戦略推進部観光企画課</a><br>
+    <a href=https://github.com/code4fukui/fukui-kanko-stat>オープンソース on GitHub</a><br>
+    <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
+    <qr-code></qr-code><br>
+  </div>
+  
+  <script type="module">
+    import { CSV } from "https://js.sabae.cc/CSV.js";
+    import { Num } from "https://js.sabae.cc/Num.js";
+    import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+    import { ChartPie } from "https://js.sabae.cc/Chart.js";
+    import { JAPAN_PREF } from "https://js.sabae.cc/JAPAN_PREF.js";
+    import {} from "./header.js";
+    import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
+    import { DateTime, Day } from "https://js.sabae.cc/DateTime.js";
+    import { removeHash } from "https://js.sabae.cc/removeHash.js";
+
+    addEventListener("load", async () => {
+      const st = document.title;
+      const n = st.indexOf("（");
+      if (n < 0) {
+        title.textContent = st;
+      } else {
+        title.textContent = st.substring(0, n);
+        subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
+      }
+      
+      const urls = {
+        福井県: "https://code4fukui.github.io/fukui-kanko-survey/all.csv",
+        石川県: "https://code4fukui.github.io/ishikawa-kanko-survey/all.csv",
+      };
+      const data = [];
+      for (const name in urls) {
+        const url = urls[name];
+        const data1 = CSV.toJSON(await CSV.fetch(url));
+        data1.forEach(i => {
+          i.pref = name;
+          if (i.施設) {
+            i.回答エリア = i.施設;
+          }
+          if (!i.回答日時)
+            throw new Error();
+          data.push(i);
+        });
+        //console.log(data1[0])
+      }
+      
+
+      const areas = ArrayUtil.toUnique(data.map(i => i.回答エリア));
+      //console.log(areas);
+      const fukuiareas = await fetchAreas();
+
+      for (const p of JAPAN_PREF) {
+        const opt = document.createElement("option");
+        opt.textContent = p;
+        selpref.appendChild(opt);
+      }
+      
+      const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
+      
+      const getPoint = (data, area) => {
+        let p = 0;
+        let cnt = 0;
+        let bkd = null;
+        for (const d of data) {
+          if (area != d.回答エリア) {
+            continue;
+          }
+          bkd = d;
+          const pref = selpref.value;
+          if (pref == "without") {
+            if (d.都道府県 == "福井県") {
+              continue;
+            }
+          } else if (pref != "" && d.都道府県 != pref) {
+            continue;
+          }
+          
+          const ngoodbad = 5 - sgoodbad.indexOf(d.満足度 || d["満足度（施設）"]);
+          if (ngoodbad < 0) throw new Error("illegal value")
+          p += ngoodbad;
+          cnt++;
+        }
+        if (!bkd) {
+          return {};
+        }
+        const link = (() => {
+          if (bkd.pref == "福井県") {
+            return `comment.html#${getAreaID(fukuiareas, bkd.回答エリア)},0`;
+          } else {
+            const c = ["すべてのエリア", area, "0", "0", "0"].map(i => encodeURIComponent(i)).join(",");
+            return `https://code4fukui.github.io/ishikawa-kanko-stat/comment-search.html#${c}`;
+          }
+        })();
+        const s = `<a target=_blank href=${link}>${area}</a>(${bkd.pref})`;
+        return { average: (p / cnt).toFixed(2), count: cnt, area: s };
+      };
+      
+      const show = () => {
+        const before = new Day().dayBefore(daylimit.value);
+        const data2 = data.filter(i => new DateTime(i.回答日時).day.isAfter(before));
+
+        location.hash = daylimit.value + "," + selpref.selectedIndex + "," + mincount.value;
+        if (location.hash == "#60,0,5") {
+          removeHash();
+        }
+        main.innerHTML = "";
+        const spot = [];
+        const min = parseInt(mincount.value) || 1;
+        let sum = 0;
+        for (const area of areas) {
+          const p = getPoint(data2, area);
+          if (p.count && p.count >= min) {
+            spot.push(p);
+            sum += p.count;
+          }
+        }
+        spansum.textContent = Num.addComma(sum);
+        spot.sort((a, b) => b.average - a.average);
+        const s = [];
+        for (let i = 0; i < spot.length; i++) {
+          const d = spot[i];
+          s.push(`<span class=rank>${i + 1}位</span><span class=point>${d.average}</span><span class=count>(${d.count}件)</span><span class=area>${d.area}</span>`);
+        }
+        /*
+        const chart = new ChartPie(sumgoodbad);
+        main.appendChild(chart);
+        */
+        main.innerHTML = s.join("\n");
+      };
+      if (location.hash.length > 1) {
+        const [limit, sel, cnt] = location.hash.substring(1).split(",");
+        if (limit) {
+          daylimit.value = limit;
+        }
+        if (sel) {
+          selpref.selectedIndex = sel;
+          mincount.value = cnt || 3;
+        }
+      }
+      show();
+      
+      mincount.onchange = selpref.onchange = daylimit.onchange = () => show();
+    });
+  </script>
+  
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    header {
+      margin: 1em;
+    }
+    h1 {
+      text-align: center;
+      padding: 0;
+      margin: 0;
+    }
+    #subtitle {
+      display: block;
+      text-align: center;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .ranking {
+      font-size: 110%;
+      font-weight: bold;
+    }
+    .good {
+      color: rgb(61, 99, 250);
+    }
+    .bad {
+      color: red;
+    }
+    .notbad {
+      color: rgb(155, 155, 22);
+    }
+    #qr {
+      text-align: center;
+    }
+    #qr {
+      margin-bottom: 2em;
+    }
+    #main {
+      display: grid;
+      grid-template-columns: 5.5em 5em 4.5em 1fr;
+      text-align: left;
+      border: 3px solid #555;
+      padding: .5em;
+      margin-bottom: 1em;
+      align-items: center;
+    }
+    .rank {
+      font-size: 150%;
+      font-weight: bold;
+      text-align: right;
+      margin-right: .2em;
+    }
+    .point {
+      font-size: 150%;
+      text-align: center;
+    }
+    .count {
+      text-align: right;
+      margin-right: .4em;
+    }
+    .area {
+      font-size: 130%;
+    }
+    #main div {
+      text-align: left;
+    }
+    input, label, select {
+      font-size: 14px;
+    }
+    #credit {
+      text-align: center;
+    }
+    #opt {
+      margin-bottom: .5em;
+    }
+  </style>
+  
+</body>
+</html>
