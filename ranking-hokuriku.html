@@ -142,7 +142,8 @@
         const s = [];
         for (let i = 0; i < spot.length; i++) {
           const d = spot[i];
-          s.push(`<span class=rank>${i + 1}位</span><span class=point>${d.average}</span><span class=count>(${d.count}件)</span><span class=area>${d.area}</span>`);
+          //s.push(`<span class=rank>${i + 1}位</span><span class=point>${d.average}</span><span class=count>(${d.count}件)</span><span class=area>${d.area}</span>`);
+          s.push(`<span><span class=rank>${i + 1}位</span><span class=point>${d.average}</span><br><span class=count>(${d.count}件)</span></span><span class=area>${d.area}</span>`);
         }
         /*
         const chart = new ChartPie(sumgoodbad);
@@ -205,29 +206,41 @@
     }
     #main {
       display: grid;
-      grid-template-columns: 5.5em 5em 4.5em 1fr;
-      text-align: left;
-      border: 3px solid #555;
-      padding: .5em;
+      x-grid-template-columns: 5.5em 5em 4.5em 1fr;
+      grid-template-columns: 8em 1fr;
+      text-align: right;
+      x-border: 3px solid #555;
+      border-top: 1px solid #555;
+      border-bottom: 1px solid #555;
+      padding: .5em 0;
       margin-bottom: 1em;
-      align-items: center;
+      align-items: top;
+    }
+    #main > span > span {
+      white-space: nowrap;
     }
     .rank {
-      font-size: 150%;
+      font-size: 140%;
       font-weight: bold;
       text-align: right;
       margin-right: .2em;
     }
     .point {
-      font-size: 150%;
+      font-size: 120%;
+      margin-left: .1em;
+      margin-right: .2em;
+      font-weight: bold;
       text-align: center;
     }
     .count {
       text-align: right;
-      margin-right: .4em;
+      margin-right: .2em;
+      margin-left: .5em;
     }
     .area {
       font-size: 130%;
+      text-align: left;
+      margin-left: .3em;
     }
     #main div {
       text-align: left;
