@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
-<title>北陸観光満足度ランキング（出典：福井県と石川県の観光オープンデータ）</title>
+<title>北陸観光アンケート数ツリーマップ（出典：福井県と石川県の観光オープンデータ）</title>
 
 </head><body>
 <header>
@@ -9,9 +9,8 @@
 
 <main>
   <div id=opt>
-    <input id=daylimit value="60" size=3 type="text">日前から
-    <select id=selpref><option value="">すべての都道府県</option><option value="without">県外</option><select>からの観光客を対象に
-      <input id=mincount value="5" size=3 type="text">件以上のみ有効として、5段階の満足度を平均
+    直近<input id=daylimit value="60" size=3 type="text">日間の
+    <select id=selpref><option value="">すべての都道府県</option><option value="without">県外</option><select>からの観光客を対象にアンケート回答数で作成
       （<span>合計<span id=spansum>-</span>件）
     </div>
     
@@ -36,7 +35,65 @@
     import { DateTime, Day } from "https://js.sabae.cc/DateTime.js";
     import { removeHash } from "https://js.sabae.cc/removeHash.js";
     import { fetchSurvey } from "./fetchSurvey.js";
+    import ApexCharts from "https://code4fukui.github.io/apexcharts.js/ApexCharts.js";
 
+    const getTreemapOptions = (data) => {
+      const options = {
+        series: [{ data }],
+        legend: {
+          show: false
+        },
+        chart: {
+          height: 650,
+          type: "treemap",
+        },
+        dataLabels: {
+          enabled: true,
+          style: {
+            fontSize: '12px',
+          },
+          formatter: (text, op) => {
+            return [text, op.value + "件"];
+          },
+          offsetY: -4
+        },
+        plotOptions: {
+          treemap: {
+            enableShades: true,
+            shadeIntensity: 0.5,
+            reverseNegativeShade: true,
+            colorScale: {
+              ranges: [
+                {
+                  from: -1000000000,
+                  to: 0,
+                  color: '#CD363A'
+                },
+                {
+                  from: 0.001,
+                  to: 1000000000,
+                  color: '#32219C'
+                }
+              ]
+            }
+          }
+        },
+        tooltip: {
+          /*
+          custom: ({series, seriesIndex, dataPointIndex, w}) => {
+            const d = w.config.series[seriesIndex].data[dataPointIndex];
+            return `${d.x}<br>${Num.fixbig(d.y, true)}円`
+          },
+          */
+          y: {
+            formatter: (v) => {
+              return v + "件";
+            },
+          }
+        },
+      };
+      return options;
+    };
     addEventListener("load", async () => {
       const st = document.title;
       const n = st.indexOf("（");
@@ -49,6 +106,7 @@
       
       const data = await fetchSurvey();      
 
+      //const areas = ArrayUtil.toUnique(data.map(i => i.回答エリア + "(" + i.pref + ")"));
       const areas = ArrayUtil.toUnique(data.map(i => i.回答エリア));
       //console.log(areas);
 
@@ -60,15 +118,13 @@
       
       const sgoodbad = ["とても満足", "満足", "どちらでもない", "不満", "とても不満"];
       
-      const getPoint = async (data, area) => {
+      const getSize = (data, area) => {
         let p = 0;
         let cnt = 0;
-        let bkd = null;
         for (const d of data) {
           if (area != d.回答エリア) {
             continue;
           }
-          bkd = d;
           const pref = selpref.value;
           if (pref == "without") {
             if (d.都道府県 == d.pref) {
@@ -77,52 +133,52 @@
           } else if (pref != "" && d.都道府県 != pref) {
             continue;
           }
-          
+          /*
           const ngoodbad = 5 - sgoodbad.indexOf(d.満足度 || d["満足度（施設）"]);
           if (ngoodbad < 0) throw new Error("illegal value")
           p += ngoodbad;
+          */
           cnt++;
         }
-        if (!bkd) {
-          return {};
-        }
-        const link = await getAreaCommentLink(area);
-        const s = `<a target=_blank href=${link}>${area}</a>(${bkd.pref})`;
-        return { average: (p / cnt).toFixed(2), count: cnt, area: s };
+        return cnt;
       };
       
-      const show = async () => {
+      const show = () => {
         const before = new Day().dayBefore(daylimit.value);
         const data2 = data.filter(i => new DateTime(i.回答日時).day.isAfter(before));
 
-        location.hash = daylimit.value + "," + selpref.selectedIndex + "," + mincount.value;
-        if (location.hash == "#60,0,5") {
+        location.hash = daylimit.value + "," + selpref.selectedIndex;
+        if (location.hash == "#60,0") {
           removeHash();
         }
-        main.innerHTML = "";
         const spot = [];
-        const min = parseInt(mincount.value) || 1;
         let sum = 0;
         for (const area of areas) {
-          const p = await getPoint(data2, area);
-          if (p.count && p.count >= min) {
-            spot.push(p);
-            sum += p.count;
+          const cnt = getSize(data2, area);
+          if (cnt) {
+            spot.push({ x: area, y: cnt });
           }
+          sum += cnt;
         }
         spansum.textContent = Num.addComma(sum);
-        spot.sort((a, b) => b.average - a.average);
-        const s = [];
-        for (let i = 0; i < spot.length; i++) {
-          const d = spot[i];
-          //s.push(`<span class=rank>${i + 1}位</span><span class=point>${d.average}</span><span class=count>(${d.count}件)</span><span class=area>${d.area}</span>`);
-          s.push(`<span><span class=rank>${i + 1}位</span><span class=point>${d.average}</span><br><span class=count>(${d.count}件)</span></span><span class=area>${d.area}</span>`);
-        }
-        /*
-        const chart = new ChartPie(sumgoodbad);
-        main.appendChild(chart);
-        */
-        main.innerHTML = s.join("\n");
+        spot.sort((a, b) => b.y - a.y);
+
+        console.log(spot);
+        main.innerHTML = "";
+        const options = getTreemapOptions(spot);
+
+        options.chart.events = {
+          dataPointSelection: async (e, ctx, config) => {
+            //console.log(config)
+            const idx = config.dataPointIndex;
+            const area = spot[idx].x;
+            const url = await getAreaCommentLink(area);
+            window.open(url, "_blank");
+          },
+        };
+
+        const chart = new ApexCharts(main, options);
+        chart.render();
       };
       if (location.hash.length > 1) {
         const [limit, sel, cnt] = location.hash.substring(1).split(",");
@@ -131,12 +187,11 @@
         }
         if (sel) {
           selpref.selectedIndex = sel;
-          mincount.value = cnt || 3;
         }
       }
       show();
       
-      mincount.onchange = selpref.onchange = daylimit.onchange = () => show();
+      selpref.onchange = daylimit.onchange = () => show();
     });
   </script>
   

@@ -8,7 +8,7 @@ export const fetchAreas = async () => {
   return areas;
 };
 
-export const getAreaID = (areas, name) => areas.find(a => name == a.エリア名 || name == a.旧エリア名).id;
+export const getAreaID = (areas, name) => areas.find(a => name == a.エリア名 || name == a.旧エリア名)?.id;
 
 export const setAreaSelect = (areas, selarea) => {
   areas.forEach(a => {
@@ -38,4 +38,18 @@ export const sortByAreaNumber = (areas, areanames) => {
   };
   areanames.sort((a, b) => get(a) - get(b));
 
+};
+
+let fukuiareas = null;
+export const getAreaCommentLink = async (area) => {
+  if (!fukuiareas) {
+    fukuiareas = await fetchAreas();
+  }
+  const fid = getAreaID(fukuiareas, area);
+  if (fid) {
+    return `comment.html#${fid},0`;
+  } else {
+    const c = ["すべてのエリア", area, "0", "0", "0"].map(i => encodeURIComponent(i)).join(",");
+    return `https://code4fukui.github.io/ishikawa-kanko-stat/comment-search.html#${c}`;
+  }
 };
