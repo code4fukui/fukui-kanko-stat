@@ -28,7 +28,7 @@
   <script type="module">
     import { CSV } from "https://js.sabae.cc/CSV.js";
     import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-    import { ChartPie } from "https://js.sabae.cc/Chart.js";
+    import { ChartPie } from "./ChartPie.js";
     import {} from "./header.js";
     import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
     
@@ -103,9 +103,24 @@
             }
             s.push("<hr>");
           }
+        }        
+        const chartData = {};
+        for (const s of sumgoodbad) {
+          chartData[s.name] = s.value;
         }
-        const chart = new ChartPie(sumgoodbad);
-        main.appendChild(chart);
+        const option = {
+          showlegend: false,
+          textinfo: "label+value+percent"
+        };
+        if (window.innerWidth <= 480) {
+          option.width = window.innerWidth - 8;
+        }
+        const chart = new ChartPie(chartData, option);
+        const chartDiv = document.createElement("div");
+        chartDiv.style.display = "inline-block";
+        chartDiv.appendChild(chart);
+        main.appendChild(chartDiv);
+
         const div = document.createElement("div");
         div.innerHTML = s.join("\n");
         main.appendChild(div);
