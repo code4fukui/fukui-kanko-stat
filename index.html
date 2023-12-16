@@ -32,9 +32,7 @@
     //const url = "./fukui-answer.csv";
     const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
     const data = await CSV.fetch(url);
-    console.log(data[0]);
     const csv = await CSV.toJSON(data);
-    console.log(csv);
     
     // チャートの種類
     const chartType = {
