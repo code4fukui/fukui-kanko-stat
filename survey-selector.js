@@ -1,7 +1,7 @@
 import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/locale/ja.min.js";
-import { fetchAreas, sortByAreaNumber } from "./area.js";
+import { sortByAreaNumber } from "./area.js";
 
 class SurveySelector {
   constructor(areas) {
@@ -336,7 +336,11 @@ class SurveySelector {
         }
         const opt = document.createElement("option");
         if (sel == "回答エリア") {
-          const city = csv.find(a => a.回答エリア == name)?.市町村;
+          let city = this.areas.find(i => i.エリア名 == name)?.市町名;
+          if (!city) {
+            city = csv.find(a => a.回答エリア == name)?.市町村;
+            //console.log(name);
+          }
           opt.textContent = city + " / " + name;
           opt.value = name;
         } else {
