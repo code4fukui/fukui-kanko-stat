@@ -34,7 +34,7 @@ export const sortByAreaNumber = (areas, areanames) => {
       console.log(name); // ?
       return 10000;
     }
-    return parseInt(n);
+    return parseInt(n) % 99999;
   };
   areanames.sort((a, b) => get(a) - get(b));
 
