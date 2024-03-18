@@ -2,6 +2,8 @@ import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js";
 import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/locale/ja.min.js";
 import { sortByAreaNumber } from "./area.js";
+import { getSurvey } from "./getSurvey.js";
+import { Day } from "https://js.sabae.cc/DateTime.js";
 
 class SurveySelector {
   constructor(areas) {
@@ -263,6 +265,7 @@ class SurveySelector {
   }
   
   createSelectElement(divsels, csv, show, option = {}) {
+    console.log("CRE!")
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -316,6 +319,7 @@ class SurveySelector {
     };
     
     const sels = Object.keys(this.surveys);
+      console.log("unix", csv);
     for (const sel of sels) {
       const box = document.createElement("span");
       box.style.display = "inline-block";
@@ -326,6 +330,7 @@ class SurveySelector {
       const s = document.createElement("select");
       s.setAttribute("multiple", true);
       s.appendChild(document.createElement("option"));
+      console.log("uni", sel, ArrayUtil.toUnique(csv.map(a => a[sel])))
       const names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
       if (sel == "回答エリア") {
         sortByAreaNumber(this.areas, names);
@@ -409,8 +414,7 @@ class SurveySelector {
   getToDate() {
     return dayjs(document.getElementById("toDate").value);
   }
-  
-  filter(csv) {
+  async filter() {
     const node2array = (nodes) => {
       const res = [];
       for (const n of nodes) {
@@ -431,13 +435,12 @@ class SurveySelector {
     const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
     const fromDate = this.getFromDate();
     const toDate = this.getToDate();
+
+    const fromd = new Day(fromDate.$y, fromDate.$M + 1, fromDate.$D);
+    const tod = new Day(toDate.$y, toDate.$M + 1, toDate.$D);
+    const csv = await getSurvey(fromd, tod);
     
     return csv.filter(c => {
-      const answerDate = dayjs(c["回答日時"]).hour(0).minute(0).second(0);
-      if (answerDate < fromDate || answerDate > toDate ) {
-      //if (answerDate.isBefore(fromDate) || answerDate.isAfter(toDate)) {
-        return false;
-      }
       for (const key of keys) {
         if (key[1].length != 0) {
           this.convertData(key[0], c);
