@@ -15,7 +15,7 @@
   <main>
     <div id=opt>
       <select id=selpref><option value="">すべての都道府県</option><option value="without">福井県外</option><select>
-        <input id=mincount value="3" size=3 type="text">件以上のみ有効
+        <input id=mincount value="10" size=3 type="text">件以上のみ有効 （直近<input id=indays value="30" size=5 type="text">日間）
         <span>合計<span id=spansum>-</span>件 (また行きたい(1年以内) と回答した率で算出)
       </div>
       
@@ -29,60 +29,58 @@
     </div>
     
     <script type="module">
-      import { CSV } from "https://js.sabae.cc/CSV.js";
-      import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
-      import { ChartPie } from "https://js.sabae.cc/Chart.js";
       import { JAPAN_PREF } from "https://js.sabae.cc/JAPAN_PREF.js";
       import {} from "./header.js";
       import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
+      import { getSurvey } from "./getSurvey.js";
+      import { Day } from "https://js.sabae.cc/DateTime.js";
+      import { Num } from "https://js.sabae.cc/Num.js";
           
       addEventListener("load", async () => {
         const st = document.title;
         title.textContent = st.substring(0, st.indexOf("（"));
         subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
-        
-        const nshow = 1000;
-        
-        const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-        const data = CSV.toJSON(await CSV.fetch(url));
-        const areas = await fetchAreas();
-        
+                
         for (const p of JAPAN_PREF) {
           const opt = document.createElement("option");
           opt.textContent = p;
           selpref.appendChild(opt);
         }
         
-        const getPoint = (area) => {
-          let p = 0;
-          let cnt = 0;
-          for (const d of data) {
-            if (getAreaID(areas, d.回答エリア) != area.id) {
-              continue;
-            }
-            const pref = selpref.value;
-            if (pref == "without") {
-              if (d.都道府県 == "福井県") {
+        const show = async () => {
+          const days = parseInt(indays.value);
+          const data = await getSurvey(new Day().dayBefore(days), new Day());
+
+          const getPoint = (area) => {
+            let p = 0;
+            let cnt = 0;
+            for (const d of data) {
+              if (getAreaID(areas, d.回答エリア) != area.id) {
                 continue;
               }
-            } else if (pref != "" && d.都道府県 != pref) {
-              continue;
+              const pref = selpref.value;
+              if (pref == "without") {
+                if (d.都道府県 == "福井県") {
+                  continue;
+                }
+              } else if (pref != "" && d.都道府県 != pref) {
+                continue;
+              }
+              
+              const ngoodbad = d.今後の来訪意向 == "また行きたい（1年以内）";
+              p += ngoodbad;
+              cnt++;
             }
-            
-            const ngoodbad = d.今後の来訪意向 == "また行きたい（1年以内）";
-            p += ngoodbad;
-            cnt++;
-          }
-          const s = `<a target=_blank href=comment-wish.html#${area.id},${selpref.value == "without" ? 1 : 0}>${area.エリア名}</a>`;
-          return { average: (p / cnt * 100).toFixed(1), count: cnt, area: s };
-        };
-        
-        const show = () => {
-          location.hash = selpref.selectedIndex + "," + mincount.value;
+            const s = `<a target=_blank href=comment-wish.html#${area.id},${selpref.value == "without" ? 1 : 0}>${area.エリア名}</a>`;
+            return { average: (p / cnt * 100).toFixed(1), count: cnt, area: s };
+          };
+
+          location.hash = selpref.selectedIndex + "," + mincount.value + "," + days;
           main.innerHTML = "";
           const spot = [];
           const min = parseInt(mincount.value) || 1;
           let sum = 0;
+          const areas = await fetchAreas();
           for (const area of areas) {
             const p = getPoint(area);
             if (p.count && p.count >= min) {
@@ -90,7 +88,7 @@
               sum += p.count;
             }
           }
-          spansum.textContent = sum;
+          spansum.textContent = Num.addComma(sum);
           spot.sort((a, b) => b.average - a.average);
           const s = [];
           for (let i = 0; i < spot.length; i++) {
@@ -109,14 +107,14 @@
           const [sel, cnt] = location.hash.substring(1).split(",");
           if (sel) {
             selpref.selectedIndex = sel || 1;
-            mincount.value = cnt || 3;
+            mincount.value = cnt || 10;
           }
         } else {
           selpref.selectedIndex = 1;
         }
         show();
         
-        mincount.onchange = selpref.onchange = () => show();
+        mincount.onchange = selpref.onchange = indays.onchange = () => show();
       });
     </script>
     
