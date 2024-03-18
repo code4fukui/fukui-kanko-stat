@@ -362,9 +362,9 @@ class SurveySelector {
     
     divsels.appendChild(document.createElement("br"));
     
-    const from = !option["fromDate"] ? dayjs().subtract(1, "months") : dayjs(option["fromDate"]);
+    const from = !option["fromDate"] ? dayjs().subtract(1, "months").subtract(1, "days") : dayjs(option["fromDate"]);
     //const from = !option["fromDate"] ? dayjs("2022-04-01") : dayjs(option["fromDate"]);
-    const to = !option["toDate"] ? dayjs() : dayjs(option["toDate"]);
+    const to = !option["toDate"] ? dayjs().subtract(1, "days") : dayjs(option["toDate"]);
     this.createDateInputElement(divsels, {
       title: "開始日",
       elementId: "fromDate",
