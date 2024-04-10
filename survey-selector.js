@@ -114,6 +114,20 @@ class SurveySelector {
       }
     },
     "回答月": {
+      selectCode: {
+        "1月": 0,
+        "2月": 1,
+        "3月": 2,
+        "4月": 3,
+        "5月": 4,
+        "6月": 5,
+        "7月": 6,
+        "8月": 7,
+        "9月": 8,
+        "10月": 9,
+        "11月": 10,
+        "12月": 11,
+      }
     },
     "満足度": {
       selectCode: {
@@ -131,8 +145,27 @@ class SurveySelector {
       }
     },
     "NPS": {
+      selectCode: {
+        "10": 0,
+        "9": 1,
+        "8": 2,
+        "7": 3,
+        "6": 4,
+        "5": 5,
+        "4": 6,
+        "3": 7,
+        "2": 8,
+        "1": 9,
+      }
     },
     "宿泊数（県内）": {
+      selectCode: {
+        "1泊": 0,
+        "2泊": 1,
+        "3泊": 2,
+        "4泊以上": 3,
+        "福井県内には宿泊しない": 4,
+      }
     },
     "今後の来訪意向": {
       selectCode: {
@@ -318,12 +351,11 @@ class SurveySelector {
       const s = document.createElement("select");
       s.setAttribute("multiple", true);
       s.appendChild(document.createElement("option"));
-      console.log("uni", sel, ArrayUtil.toUnique(csv.map(a => a[sel])))
       let names = null;
       if (sel == "回答エリア") {
         names = this.areas.map(i => i.市町名 + " / " + i.エリア名);
       } else {
-        names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
+        names = Object.keys(this.surveys[sel].selectCode);
       }
       names.forEach(name => {
         if (!name) {
