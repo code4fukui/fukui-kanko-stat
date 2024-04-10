@@ -319,9 +319,11 @@ class SurveySelector {
       s.setAttribute("multiple", true);
       s.appendChild(document.createElement("option"));
       console.log("uni", sel, ArrayUtil.toUnique(csv.map(a => a[sel])))
-      const names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
+      let names = null;
       if (sel == "回答エリア") {
-        sortByAreaNumber(this.areas, names);
+        names = this.areas.map(i => i.市町名 + " / " + i.エリア名);
+      } else {
+        names = this.sortSelectCodes(sel, ArrayUtil.toUnique(csv.map(a => a[sel])));
       }
       names.forEach(name => {
         if (!name) {
@@ -329,13 +331,8 @@ class SurveySelector {
         }
         const opt = document.createElement("option");
         if (sel == "回答エリア") {
-          let city = this.areas.find(i => i.エリア名 == name)?.市町名;
-          if (!city) {
-            city = csv.find(a => a.回答エリア == name)?.市町村;
-            //console.log(name);
-          }
-          opt.textContent = city + " / " + name;
-          opt.value = name;
+          opt.textContent = name;
+          opt.value = name.substring(name.indexOf(" / ") + 3);
         } else {
           opt.textContent = name;
         }
