@@ -18,14 +18,12 @@
     import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
     import {} from "./header.js";
     import { SurveySelector } from "./survey-selector.js";
-    
+    import { fetchAreas } from "./area.js";
+
     addEventListener("load", async () => {
       title.textContent = document.title;
-      const surveySelector = new SurveySelector();
-      
-      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-      const data = await CSV.fetch(url);
-      const csv = CSV.toJSON(data);
+      const areas = await fetchAreas();
+      const surveySelector = new SurveySelector(areas);
       
       // 各チャートの情報
       const charts = {
@@ -52,9 +50,9 @@
         return res;
       };
       
-      const show = () => {
+      const show = async () => {
         divpie.innerHTML = "";
-        const csv2 = surveySelector.filter(csv);
+        const csv2 = await surveySelector.filter();
         
         if (csv2.length) {
           const names = Object.keys(charts);
@@ -105,7 +103,7 @@
         };
       };
       
-      surveySelector.createSelectElement(divsels, csv, show);
+      surveySelector.createSelectElement(divsels, null, show);
 
       show();
     });
