@@ -22,12 +22,8 @@
   // iOS14以前に関する対応（top-level await未対応のため）
   addEventListener("load", async () => {
     title.textContent = document.title;
-    const surveySelector = new SurveySelector();
-    
-    const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-    const data = await CSV.fetch(url);
-    const csv = await CSV.toJSON(data);
-    
+    const surveySelector = await SurveySelector.create();
+        
     // チャートの種類
     const chartType = {
       "pie": "円グラフ",
@@ -76,9 +72,9 @@
       }
     };
     
-    const show = () => {
+    const show = async () => {
       divpie.innerHTML = "";
-      const csv2 = surveySelector.filter(csv);
+      const csv2 = await surveySelector.filter();
       
       if (csv2.length) {
         const names = Object.keys(charts);
@@ -163,7 +159,7 @@
       }
     };
     
-    surveySelector.createSelectElement(divsels, csv, show);
+    surveySelector.createSelectElement(divsels, null, show);
 
     show();
   });

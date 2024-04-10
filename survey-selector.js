@@ -4,10 +4,15 @@ import "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/locale/ja.min.js";
 import { sortByAreaNumber } from "./area.js";
 import { getSurvey } from "./getSurvey.js";
 import { Day } from "https://js.sabae.cc/DateTime.js";
-
+import { fetchAreas } from "./area.js";
+  
 class SurveySelector {
   constructor(areas) {
     this.areas = areas;
+  }
+  static async create() {
+    const areas = await fetchAreas();
+    return new SurveySelector(areas);
   }
   // 各チャートの情報
   surveys = {
