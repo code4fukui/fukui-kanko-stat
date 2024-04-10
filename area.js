@@ -29,10 +29,15 @@ export const getLongAreaName = (areas, area) => {
 
 export const sortByAreaNumber = (areas, areanames) => {
   const get = (name) => {
-    const n = areas.find(a => a.エリア名 == name)?.通し番号;
+    let n = areas.find(a => a.エリア名 == name)?.通し番号;
     if (n == undefined) {
-      console.log(name); // ?
-      return 10000;
+      if (name == "スーベニアショップふらぷとる エリア") {
+        n = areas.find(a => a.エリア名 == "スーベニアショップ ラプトル エリア")?.通し番号;
+      }
+      if (n == undefined) {
+        console.log("sortByAreaNumber", name); // ?
+        return 10000;
+      }
     }
     return parseInt(n) % 99999;
   };
