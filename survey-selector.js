@@ -197,21 +197,11 @@ class SurveySelector {
         return 0;
       });
       
-      case "回答月":
-      return codes.sort((c1, c2) => {
-        const n1 = Number(c1.slice(-1));
-        const n2 = Number(c2.slice(-1));
-        
-        if (n1 < n2) {
-          return -1;
-        }
-        
-        if (n1 > n2) {
-          return 1;
-        }
-        
-        return 0;
-      });
+      case "回答月": {
+        const res = [];
+        for (let i = 1; i <= 12; i++) res.push(i + "月");
+        return res;
+      }
       
       case "NPS":
       return codes.sort((c1, c2) => {
@@ -265,7 +255,6 @@ class SurveySelector {
   }
   
   createSelectElement(divsels, csv, show, option = {}) {
-    console.log("CRE!")
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -319,7 +308,6 @@ class SurveySelector {
     };
     
     const sels = Object.keys(this.surveys);
-      console.log("unix", csv);
     for (const sel of sels) {
       const box = document.createElement("span");
       box.style.display = "inline-block";
