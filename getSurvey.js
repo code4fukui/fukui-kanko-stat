@@ -14,10 +14,10 @@ const fetchMonth = async (ym) => {
 export const getSurvey = async (fromd, tod) => {
   if (!fromd) return csv;
   if (tod.getDayOfGregorian() < fromd.getDayOfGregorian()) return [];
-  for (let d = fromd; d.getDayOfGregorian() <= tod.getDayOfGregorian(); d = d.nextMonth()) {
+  const ym = d => d.year * 100 + d.month;
+  for (let d = fromd; ym(d) <= ym(tod); d = d.nextMonth()) {
     const ym = d.toStringYM();
     await fetchMonth(ym);
-    console.log(ym);
   }
   /*
   if (!csv) {
