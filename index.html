@@ -136,9 +136,7 @@
     };
     
     const show = async () => {
-      console.log("show")
       divpie.innerHTML = "";
-      console.log(divsels.querySelectorAll("select"));
       const csv2 = await surveySelector.filter();
       
       if (csv2.length) {
@@ -237,8 +235,7 @@
 
     // initial csv
     const csv = await getSurvey(new Day().dayBefore(2), new Day());
-    console.log("INITI", csv);
-
+    
     surveySelector.createSelectElement(divsels, csv, show);
 
     show();
@@ -257,6 +254,9 @@
   }
   #divsels {
     margin-bottom: .5em;
+  }
+  #divsels select {
+    height: 7em;
   }
   #prefbox > * {
     margin: .5em .2em;
