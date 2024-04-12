@@ -20,7 +20,7 @@
   
   <div id=credit>
     出典: <a href=https://www.fuku-e.com/feature/detail_266.html>福井県観光データ分析システム「FTAS」｜特集｜【公式】福井県 観光/旅行サイト ｜ ふくいドットコム</a><br>
-    出典: <a href=https://sites.google.com/view/milli-ishikawa-pref/%E3%83%9B%E3%83%BC%E3%83%A0>Milli - 石川県観光戦略推進部観光企画課</a><br>
+    出典: <a href=https://sites.google.com/view/milli-ishikawa-pref/%E3%83%9B%E3%83%BC%E3%83%A0>Milli - 石川県観光戦略推進部観光企画課</a> (<a href=https://github.com/code4fukui/ishikawa-kanko-survey/>data on GitHub)<br>
     <a href=https://github.com/code4fukui/fukui-kanko-stat>オープンソース on GitHub</a><br>
     <script type="module" src="https://code4fukui.github.io/qr-code/qr-code.js"></script>
     <qr-code></qr-code><br>
@@ -47,11 +47,6 @@
         subtitle.textContent = st.substring(st.indexOf("（") + 1, st.length - 1);
       }
       
-      const data = await fetchSurvey();      
-
-      const areas = ArrayUtil.toUnique(data.map(i => i.回答エリア));
-      //console.log(areas);
-
       for (const p of JAPAN_PREF) {
         const opt = document.createElement("option");
         opt.textContent = p;
@@ -93,7 +88,8 @@
       
       const show = async () => {
         const before = new Day().dayBefore(daylimit.value);
-        const data2 = data.filter(i => new DateTime(i.回答日時).day.isAfter(before));
+        const data = await fetchSurvey(before);
+        const areas = ArrayUtil.toUnique(data.map(i => i.回答エリア));
 
         location.hash = daylimit.value + "," + selpref.selectedIndex + "," + mincount.value;
         if (location.hash == "#60,0,5") {
@@ -104,7 +100,7 @@
         const min = parseInt(mincount.value) || 1;
         let sum = 0;
         for (const area of areas) {
-          const p = await getPoint(data2, area);
+          const p = await getPoint(data, area);
           if (p.count && p.count >= min) {
             spot.push(p);
             sum += p.count;

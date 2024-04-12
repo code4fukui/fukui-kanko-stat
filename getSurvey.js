@@ -13,6 +13,7 @@ const fetchMonth = async (ym) => {
 
 export const getSurvey = async (fromd, tod) => {
   if (!fromd) return csv;
+  if (!tod) tod = new Day();
   if (tod.getDayOfGregorian() < fromd.getDayOfGregorian()) return [];
   const ym = d => d.year * 100 + d.month;
   for (let d = fromd; ym(d) <= ym(tod); d = d.nextMonth()) {

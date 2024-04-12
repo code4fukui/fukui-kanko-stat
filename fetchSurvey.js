@@ -1,24 +1,12 @@
-import { CSV } from "https://js.sabae.cc/CSV.js";
-    
-export const fetchSurvey = async () => {
-  const urls = {
-    福井県: "https://code4fukui.github.io/fukui-kanko-survey/all.csv",
-    石川県: "https://code4fukui.github.io/ishikawa-kanko-survey/all.csv",
-  };
-  const data = [];
-  for (const name in urls) {
-    const url = urls[name];
-    const data1 = CSV.toJSON(await CSV.fetch(url));
-    data1.forEach(i => {
-      i.pref = name;
-      if (i.施設) {
-        i.回答エリア = i.施設;
-      }
-      if (!i.回答日時)
-        throw new Error();
-      data.push(i);
-    });
-    //console.log(data1[0])
-  }
-  return data;
+import { getSurvey } from "./getSurvey.js";
+import { getSurveyIshikawa } from "./getSurveyIshikawa.js";
+
+export const fetchSurvey = async (before) => {
+  const ishikawa = await getSurveyIshikawa(before);
+  ishikawa.forEach(i => i.pref = "石川県");
+  const fukui = await getSurvey(before);
+  fukui.forEach(i => i.pref = "福井県");
+  console.log("ishikawa", ishikawa)
+  console.log("fukui", fukui)
+  return [...ishikawa, ...fukui];
 };
