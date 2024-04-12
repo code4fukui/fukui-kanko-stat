@@ -11,8 +11,7 @@
   </nav>
   <hr />
   <a href=https://code4fukui.github.io/opendata_fukui/renewpay_payment_linked_2022.csv>Renew Pay決済CSVデータ</a>
-  <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>アンケートCSVデータ</a>
-  (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
+  <a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a><br>
 </div>
 
 <script type="module">
@@ -27,7 +26,7 @@
     const renewPayData = await CSV.fetch(renewPayUrl);
     const renewPayCsv = await CSV.toJSON(renewPayData);
     
-    const surveyUrl = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+    const surveyUrl = "https://code4fukui.github.io/fukui-kanko-survey/fiscalyearly/2022.csv";
     const surveyData = await CSV.fetch(surveyUrl);
     const surveyCsv = await CSV.toJSON(surveyData).reduce((obj, d) => {
       obj[d["会員ID"]] = d;

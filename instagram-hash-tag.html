@@ -9,7 +9,7 @@
   <div id=divpie></div>
   <hr />
   <a href="https://github.com/code4fukui/fukui-kanko-hashtag" target="_blank">福井県観光ハッシュタグ別投稿数 CSVデータ</a> (<a href="https://github.com/code4fukui/copyright-policy-jp/tree/main/OpenDataStandardTermsofUse" target="_blank">オープンデータ標準利用規約</a>) <a href="https://www.fuku-e.com/" target="_blank">福井県観光連盟</a><br>
-  <a href="https://code4fukui.github.io/fukui-kanko-survey/all.csv" target="_blank">アンケート CSVデータ</a> (<a href="https://github.com/code4fukui/fukui-kanko-survey" target="_blank">data on GitHub</a>)<br/>
+  <a href="https://github.com/code4fukui/fukui-kanko-survey" target="_blank">data on GitHub</a><br/>
   <a href="https://github.com/code4fukui/fukui-kanko-stat/" target="_blank">src on GitHub by Code for FUKUI</a><br>
 </div>
 
@@ -27,13 +27,6 @@
     const areas = await fetchAreas();
     const surveySelector = new SurveySelector(areas);
     
-    //const url = "./fukui-answer.csv";
-    /*
-    const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-    const data = await CSV.fetch(url);
-    const csv = await CSV.toJSON(data);
-    */
-
     const fns = [
     "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202204.csv",
     "https://code4fukui.github.io/fukui-kanko-hashtag/hashtag_202205.csv",
