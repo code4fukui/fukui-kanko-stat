@@ -291,8 +291,8 @@ class SurveySelector {
       break;
     }
   }
-  
-  createSelectElement(divsels, csv, show, option = {}) {
+
+  createSelects(divsels, show) {
     const addElementToBox = (box, sel, parent) => {
       switch (sel) {
         case "都道府県":
@@ -381,28 +381,32 @@ class SurveySelector {
       s.dataname = sel;
       s.onchange = show;
     }
-    
     divsels.appendChild(document.createElement("br"));
-    
+  }
+  createDates(divsels, option = {}) {
     const from = !option["fromDate"] ? dayjs().subtract(1, "months").subtract(1, "days") : dayjs(option["fromDate"]);
     //const from = !option["fromDate"] ? dayjs("2022-04-01") : dayjs(option["fromDate"]);
     const to = !option["toDate"] ? dayjs().subtract(1, "days") : dayjs(option["toDate"]);
-    this.createDateInputElement(divsels, {
+    const infromd = this.createDateInputElement(divsels, {
       title: "開始日",
       elementId: "fromDate",
       date: from.format("YYYY-MM-DD"),
-      onChange: show,
       min: option["minFromDate"],
       max: option["maxFromDate"]
     });
-    this.createDateInputElement(divsels, {
+    const intod = this.createDateInputElement(divsels, {
       title: "終了日",
       elementId: "toDate",
       date: to.format("YYYY-MM-DD"),
-      onChange: show,
       min: option["minToDate"],
       max: option["maxToDate"]
     });
+    return { infromd, intod };
+  }
+
+  createSelectElement(divsels, csv, show, option = {}) {
+    this.createSelects(divsels, show);
+    this.createDates(divsels, option);
   }
   
   createDateInputElement(parent, option) {
@@ -427,6 +431,7 @@ class SurveySelector {
     }
     box.appendChild(dateInputElement);
     parent.appendChild(box);
+    return dateInputElement;
   }
   
   getFromDate() {
@@ -436,7 +441,15 @@ class SurveySelector {
   getToDate() {
     return dayjs(document.getElementById("toDate").value);
   }
-  async filter() {
+  async filter(fromd, tod) { // Day
+    if (!fromd) {
+      const fromDate = this.getFromDate();
+      const toDate = this.getToDate();
+
+      fromd = new Day(fromDate.$y, fromDate.$M + 1, fromDate.$D);
+      tod = new Day(toDate.$y, toDate.$M + 1, toDate.$D);      
+    }
+
     const node2array = (nodes) => {
       const res = [];
       for (const n of nodes) {
@@ -455,11 +468,7 @@ class SurveySelector {
     };
     
     const keys = node2array(divsels.querySelectorAll("select")).map(s => [s.dataname, generateKeys(s.selectedOptions)]);
-    const fromDate = this.getFromDate();
-    const toDate = this.getToDate();
 
-    const fromd = new Day(fromDate.$y, fromDate.$M + 1, fromDate.$D);
-    const tod = new Day(toDate.$y, toDate.$M + 1, toDate.$D);
     const csv = await getSurvey(fromd, tod);
     
     return csv.filter(c => {

@@ -3,9 +3,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.6/dayjs.min.js"></script>
 </head><body>
   <h1 id=title></h1>
-  <div id=prefbox></div>
+  <div id=ctrlbox>
+    <div id=prefbox></div>
+    <label><input type=checkbox id=chkdual>2期間比較</label>
+  </div>
   <div id=divsels></div>
-  <div id=divpie></div>
+  <div id=divs>
+    <div id=div1>
+      <div id=divdate></div>
+      <div id=divpie></div>
+    </div>
+    <div id=div2>
+      <div id=divdate2></div>
+      <div id=divpie2></div>
+    </div>
+  </div>
   <hr />
   <a href=https://code4fukui.github.io/fukui-kanko-survey/all.csv>CSVデータ</a>
   (<a href=https://github.com/code4fukui/fukui-kanko-survey>data on GitHub</a>, <a href="https://github.com/code4fukui/fukui-kanko-stat/">src on GitHub by Code for FUKUI</a>)<br>
@@ -112,32 +124,10 @@
       return res;
     };
     
-    const onChangeChartSelect = (title, index, event) => {
-      charts[title]["type"] = event.target.value;
-      changeChart(title, index);
-    };
     
-    const changeChart = (title, index) => {
-      const chartPie = document.getElementById("chart-pie" + index);
-      const chartBar = document.getElementById("chart-bar" + index);
-      
-      switch (charts[title]["type"]) {
-        case chartType["pie"]:
-        chartPie.style.display = "inline-block";
-        chartBar.style.display = "none";
-        break;
-        case chartType["bar"]:
-        chartPie.style.display = "none";
-        chartBar.style.display = "inline-block";
-        break;
-        default:
-        break;
-      }
-    };
-    
-    const show = async () => {
+    const show = async (divpie, fromd, tod) => {
       divpie.innerHTML = "";
-      const csv2 = await surveySelector.filter();
+      const csv2 = await surveySelector.filter(fromd, tod);
       
       if (csv2.length) {
         const names = Object.keys(charts);
@@ -190,7 +180,6 @@
           const chartTitle = charts[name].index == CHART_INDEX_MULTI ? `${name}（複数回答あり）` : name;
           span.textContent = chartTitle + ` (${csv2.length}件)`;
           const chartSelect = document.createElement("select");
-          chartSelect.onchange = onChangeChartSelect.bind(null, name, index);
           for (const key in chartType) {
             const opt = document.createElement("option");
             opt.textContent = chartType[key];
@@ -206,39 +195,68 @@
           div2.appendChild(chartPie);
           div2.appendChild(chartBar);
           divpie.append(div2);
-          changeChart(name, index);
-        });
-        
-        /*
-        const cnts = [7, 8, 11];
-        for (const n of cnts) {
-          const q = "Q" + n;
-          const names = Object.keys(csv2[0]).filter(a => a.startsWith(q + ":"));
-          const data = {};
-          for (const d of csv2) {
-            for (const name of names) {
-              if (d[name] == "1") {
-                if (!data[name]) {
-                  data[name] = 1;
-                } else {
-                  data[name]++;
-                }
-              }
+
+          const setChartType = (type) => {
+            switch (type) {
+              case chartType["pie"]:
+                chartPie.style.display = "inline-block";
+                chartBar.style.display = "none";
+                break;
+              case chartType["bar"]:
+                chartPie.style.display = "none";
+                chartBar.style.display = "inline-block";
+                break;
             }
-          }
-          const chart = new ChartPie(data);
-          divpie.append(chart);
-        }
-        */
+          };
+          setChartType(charts[name].type);
+          chartSelect.onchange = () => {
+            const type = event.target.value;
+            setChartType(type);
+          };
+        });
       };
     };
 
     // initial csv
     const csv = await getSurvey(new Day().dayBefore(2), new Day());
     
-    surveySelector.createSelectElement(divsels, csv, show);
+    const dates1 = surveySelector.createDates(divdate);
+    const show1 = () => {
+      const fromd = new Day(dates1.infromd.value);
+      const tod = new Day(dates1.intod.value);
+      show(divpie, fromd, tod);
+    };
+    dates1.infromd.onchange = dates1.intod.onchange = show1;
+    //dates1.infromd.oninput = dates1.intod.oninput = show1;
+    show1();
 
-    show();
+    const dates2 = surveySelector.createDates(divdate2);
+    const show2 = () => {
+      const fromd = new Day(dates2.infromd.value);
+      const tod = new Day(dates2.intod.value);
+      show(divpie2, fromd, tod);
+    };
+    dates2.infromd.onchange = dates2.intod.onchange = show2;
+    //dates2.infromd.oninput = dates2.intod.oninput = show2;
+    show2();
+
+    const showall = () => {
+      show1();
+      show2();
+    };
+    surveySelector.createSelects(divsels, showall);
+
+    chkdual.onchange = () => {
+      console.log(chkdual.checked);
+      if (chkdual.checked) {
+        div2.style.display = "inline-block";
+        div1.style.width = "48vw";
+      } else {
+        div2.style.display = "none";
+        div1.style.width = "100vw";
+      } 
+    };
+    chkdual.onchange();
   });
   
 </script>
@@ -260,5 +278,13 @@
   }
   #prefbox > * {
     margin: .5em .2em;
+  }
+  #divs > div {
+    vertical-align: top;
+    display: inline-block;
+    width: 48vw;
+  }
+  #prefbox {
+    display: inline;
   }
 </style>
