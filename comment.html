@@ -41,15 +41,9 @@
       
       const nshow = 1000;
       
-      /*
-      //const url = "./fukui-answer.csv";
-      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-      const data = CSV.toJSON(await CSV.fetch(url));
-      */
-      const data = await getSurvey(new Day().dayBefore(6 * 60), new Day());
+      // 過去1年分を対象とする
+      const data = await getSurvey(new Day().dayBefore(366), new Day());
       data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
-      console.log(data.map(i => i.回答日時))
-
 
       const areas = await fetchAreas();
       setAreaSelect(areas, selarea);

@@ -23,11 +23,7 @@
   addEventListener("load", async () => {
     title.textContent = document.title;
     const surveySelector = new SurveySelector();
-    
-    //const url = "./fukui-answer.csv";
-    const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-    const data = await CSV.fetch(url);
-    const csv = await CSV.toJSON(data);
+        
     const scoreList = {
       "福井県内での交通手段の満足度": {
         "とても満足": 10,
@@ -73,24 +69,10 @@
       },
     }
     
-    const show = () => {
+    const show = async () => {
       main.innerHTML = "";
-      
-      const filter = ((data) => {
-        const fromDate = surveySelector.getFromDate();
-        const toDate = surveySelector.getToDate();
-        
-        return data.filter(d => {
-          const answerDate = dayjs(d["回答日時"]).hour(0).minute(0).second(0);
-          if (answerDate < fromDate || answerDate > toDate ) {
-            return false;
-          }
-          
-          return true;
-        });
-      });
-      
-      const csv2 = filter(csv);
+            
+      const csv2 = await surveySelector.filter();
       if (csv2.length) {
         const favourableScore = {};
         // const trafficValues = Object.values(scoreList["福井県内での交通手段の満足度"]);

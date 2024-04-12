@@ -33,7 +33,9 @@
     import { ChartPie } from "https://js.sabae.cc/Chart.js";
     import {} from "./header.js";
     import { fetchAreas, getAreaID, setAreaSelect } from "./area.js";
-    
+    import { getSurvey } from "./getSurvey.js";
+    import { Day } from "https://js.sabae.cc/DateTime.js";
+
     addEventListener("load", async () => {
       const st = document.title;
       title.textContent = st.substring(0, st.indexOf("（"));
@@ -41,10 +43,10 @@
       
       const nshow = 1000;
       
-      //const url = "./fukui-answer.csv";
-      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
-      const data = CSV.toJSON(await CSV.fetch(url));
+      // 過去1年分を対象とする
+      const data = await getSurvey(new Day().dayBefore(366), new Day());
       data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
+
       const areas = await fetchAreas();
       setAreaSelect(areas, selarea);
       
