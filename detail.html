@@ -6,14 +6,8 @@
     <h1>福井県観光アンケート 詳細</h1>
     <a id=subtitle href=https://www.fuku-e.com/feature/detail_266.html>データ出典：福井県観光連盟</a>
   </header>
-  
-  <div id=settings>
-    <select id=selarea><option>すべてのエリア</option></select>
-    <label><input id="chkwithout" type="checkbox">県外の方のみ</label>
-    <label><input id="chkwithout2" type="checkbox">複数回答の方のみ</label>
-    <span id=ndata>-</span>件
-  </div>
-  
+
+  <div class=info>回答件数: <span id=ndata>-</span>件</div>
   <main id=main>
   </main>
   
@@ -30,10 +24,22 @@
     
     addEventListener("load", async () => {
       const nshow = 100;
+
       let showid = -1;
+      if (location.hash.length > 1) {
+        const [narea, chk, chk2] = location.hash.substring(1).split(",");
+        if (narea) {
+          if (narea.startsWith("id=")) {
+            showid = narea.substring(3);
+          }
+        }
+      }
+      if (showid < 0) {
+        alert("err");
+      }
       
       //const url = "./fukui-answer.csv";
-      const url = "https://code4fukui.github.io/fukui-kanko-survey/all.csv";
+      const url = "https://code4fukui.github.io/fukui-kanko-survey/byid/" + ((showid / 100) >> 0) + "00.csv";
       const data = CSV.toJSON(await CSV.fetch(url));
       data.sort((a, b) => -a.回答日時.localeCompare(b.回答日時));
       
@@ -48,18 +54,7 @@
           delete d[name];
         }
       });
-      
-      const areas = ArrayUtil.toUnique(data.map(d => d.回答エリア2)).sort();
-      areas.forEach(a => {
-        const opt = document.createElement("option");
-        opt.textContent = a;
-        selarea.appendChild(opt);
-      });
-      const getArea = () => {
-        const v = selarea.value;
-        return v == "すべてのエリア" ? 0 : parseInt(v);
-      };
-      
+            
       const makeTableFromJSON = (d) => {
         const cr = (tag, p) => {
           const c = document.createElement(tag);
@@ -158,25 +153,7 @@
           }
         }
       };
-      if (location.hash.length > 1) {
-        const [narea, chk, chk2] = location.hash.substring(1).split(",");
-        if (narea) {
-          if (narea.startsWith("id=")) {
-            showid = narea.substring(3);
-            settings.style.display = "none";
-          } else {
-            selarea.selectedIndex = narea;
-          }
-        }
-        if (chk) {
-          chkwithout.checked = chk == "1";
-        }
-        if (chk2) {
-          chkwithout2.checked = chk2 == "1";
-        }
-      }
       show();
-      selarea.onchange = chkwithout.onchange = chkwithout2.onchange = () => show();
     });
   </script>
   
@@ -197,6 +174,9 @@
       text-align: center;
       font-weight: bold;
       text-decoration: none;
+    }
+    .info {
+      margin: 1em;
     }
     .comment {
       font-size: 120%;
