@@ -5,16 +5,20 @@ const csv = [];
 const month = {};
 const fetchMonth = async (ym) => {
   if (month[ym]) return;
+  month[ym] = true;
   const url = "https://code4fukui.github.io/fukui-kanko-survey/monthly/" + ym + ".csv";
   const data = await CSV.fetchJSON(url);
   data.forEach(i => csv.push(i));
-  month[ym] = true;
 };
 
 export const getSurvey = async (fromd, tod) => {
   if (!fromd) return csv;
   if (!tod) tod = new Day();
   if (tod.getDayOfGregorian() < fromd.getDayOfGregorian()) return [];
+  const startd = new Day("2022-04-01");
+  const endd = new Day().dayBefore(1);
+  if (fromd.isBefore(startd)) fromd = startd;
+  if (tod.isAfter(endd)) tod = endd;
   const ym = d => d.year * 100 + d.month;
   for (let d = fromd; ym(d) <= ym(tod); d = d.nextMonth()) {
     const ym = d.toStringYM();
