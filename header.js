@@ -15,7 +15,7 @@ addEventListener("load", async () => {
   
   const url = base + "data/apps.csv";
   const smenu = await CSV.fetchJSON(url);
-  console.log(smenu);
+  //console.log(smenu);
   
   const css = document.createElement("link");
   css.rel = "stylesheet";
