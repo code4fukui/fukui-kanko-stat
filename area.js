@@ -5,9 +5,6 @@ export const fetchAreas = async () => {
   const areas = await CSV.fetchJSON(urlarea);
   areas.filter(a => !a.通し番号).forEach(a => a.通し番号 = 100000 + parseInt(a.id));
   areas.sort((a, b) => parseInt(a.通し番号) - parseInt(b.通し番号));
-  areas.forEach(a => {
-    if (a.name == "スーベニアショップ ラプトル エリア") a.name = "スーベニアショップふらぷとる エリア";
-  });
   return areas;
 };
 

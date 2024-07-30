@@ -8,7 +8,12 @@ const fetchMonth = async (ym) => {
   month[ym] = true;
   const url = "https://code4fukui.github.io/fukui-kanko-survey/monthly/" + ym + ".csv";
   const data = await CSV.fetchJSON(url);
-  data.forEach(i => csv.push(i));
+  data.forEach(i => {
+    if (i.登録エリア == "スーベニアショップ ラプトル エリア") {
+      i.登録エリア = "スーベニアショップふらぷとる エリア";
+    }
+    csv.push(i);
+  });
 };
 
 export const getSurvey = async (fromd, tod) => {
