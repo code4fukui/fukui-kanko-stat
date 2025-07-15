@@ -34,6 +34,7 @@
   import { fetchAreas } from "./area.js";
   import { getSurvey } from "./getSurvey.js";
   import { Day } from "https://js.sabae.cc/DateTime.js";
+  import { downloadFile } from "https://js.sabae.cc/downloadFile.js";
 
   const CHART_INDEX_SINGLE = "single";
   const CHART_INDEX_MULTI = "multi";
@@ -130,7 +131,18 @@
     const show = async (divpie, fromd, tod) => {
       divpie.innerHTML = "";
       const csv2 = await surveySelector.filter(fromd, tod);
-      
+
+      const spana = document.createElement("a");
+      spana.textContent = "CSVダウンロード"
+      spana.className = "csvdownload";
+      spana.href = "#";
+      spana.onclick = () => {
+        downloadFile("data.csv", new TextEncoder().encode(CSV.stringify(csv2)));
+      };
+      const diva = document.createElement("div");
+      diva.appendChild(spana);
+      divpie.appendChild(diva);
+
       if (csv2.length) {
         const names = Object.keys(charts);
         names.forEach((name, index) => {
@@ -288,6 +300,10 @@
   }
   #prefbox {
     display: inline;
+  }
+  .csvdownload {
+    display: inline-block;
+    padding: .5em;
   }
 </style>
 
