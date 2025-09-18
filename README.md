@@ -13,3 +13,4 @@
 
 - [福井県観光アンケートオープンデータ](https://github.com/code4fukui/fukui-kanko-survey/)
 - [福井県Instagramハッシュタグ投稿数](https://github.com/code4fukui/fukui-kanko-hashtag/)
+- [ふくいドットコムスポット一覧 （福井県観光スポット一覧）](https://github.com/code4fukui/fukui-spot)
