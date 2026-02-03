@@ -64,7 +64,7 @@
         let cnt = 0;
         const s = [];
         //const sgoodbad = ArrayUtil.toUnique(data.map(d => d.今後の来訪意向));
-        const sgoodbad = ["また行きたい（1年以内）", "福井県在住", "機会があれば行きたい", "あまり行きたいと思わない", "どちらともいえない", "行きたくない", ""];
+        const sgoodbad = ["また行きたい（1年以内）", "福井県在住", "機会があれば行きたい", "あまり行きたいと思わない", "どちらともいえない", "行きたくない", "無回答"];
         const sumgoodbad = sgoodbad.map(s => {
           return { name: s, value: 0 };
         });
@@ -82,7 +82,11 @@
             continue;
           }
           
-          const ngoodbad = sgoodbad.indexOf(d.今後の来訪意向);
+          let wish = d.今後の来訪意向;
+          if (!wish) {
+            wish = "無回答";
+          }
+          const ngoodbad = sgoodbad.indexOf(wish);
           sumgoodbad[ngoodbad].value++;
           
           const comment = d.福井県に求めるもの;
@@ -95,7 +99,11 @@
             if (filterarea && n == "回答エリア2") {
               continue;
             }
-            s.push(`${n}: ${d[n]}`);
+            let value = d[n];
+            if (!value && n === "今後の来訪意向") {
+              value = "無回答";
+            }
+            s.push(`${n}: ${value}`);
           }
           s.push("<hr>");
           if (cnt++ == nshow) {
