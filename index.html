@@ -153,7 +153,10 @@
             case CHART_INDEX_SINGLE:
               for (const d of csv2) {
                 surveySelector.convertData(name, d);
-                const v = d[name];
+                let v = d[name];
+                if (!v && name === "今後の来訪意向") {
+                  v = "無回答";
+                }
                 if (!data[v]) {
                   data[v] = 1;
                 } else {
