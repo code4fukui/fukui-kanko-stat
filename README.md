@@ -1,5 +1,7 @@
 # fukui-kanko-stat
 
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
 An open source web application for analyzing the Fukui Prefecture Tourism Survey open data.
 
 ## Features
@@ -18,3 +20,7 @@ An open source web application for analyzing the Fukui Prefecture Tourism Survey
 - [Fukui Prefecture Tourism Survey Open Data](https://github.com/code4fukui/fukui-kanko-survey/)
 - [Fukui Prefecture Instagram Hashtag Post Count](https://github.com/code4fukui/fukui-kanko-hashtag/)
 - [List of Spots on Fukui.com (List of Fukui Prefecture Tourism Spots)](https://github.com/code4fukui/fukui-spot)
+
+## License
+
+MIT License
