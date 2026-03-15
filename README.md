@@ -1,16 +1,20 @@
-# 福井県観光アンケートオープンデータ活用アプリ
- 
-- [観光オープンデータ簡易分析](https://code4fukui.github.io/fukui-kanko-stat/)
-- [福井県観光アンケートトレンド](https://code4fukui.github.io/fukui-kanko-stat/trend.html)
-- [福井県観光オープンデータ回答数推移(日別)](https://code4fukui.github.io/fukui-kanko-stat/daily.html)
-- [福井県観光アンケートコメントマップ](https://code4fukui.github.io/sightseeingApp/)
-- [福井県観光オープンデータコメント新着順](https://code4fukui.github.io/fukui-kanko-stat/comment.html)
-- [コメント検索](https://code4fukui.github.io/fukui-kanko-stat/comment-search.html)
-- [福井観光エリア満足度ランキング](https://code4fukui.github.io/fukui-kanko-stat/ranking.html)
-- [福井県観光ハッシュタグ別投稿数推移 on Instagram](https://code4fukui.github.io/fukui-kanko-hashtag/)
+# fukui-kanko-stat
 
-## オープンデータ
+An open source web application for analyzing the Fukui Prefecture Tourism Survey open data.
 
-- [福井県観光アンケートオープンデータ](https://github.com/code4fukui/fukui-kanko-survey/)
-- [福井県Instagramハッシュタグ投稿数](https://github.com/code4fukui/fukui-kanko-hashtag/)
-- [ふくいドットコムスポット一覧 （福井県観光スポット一覧）](https://github.com/code4fukui/fukui-spot)
+## Features
+
+- Simple analysis of Fukui Prefecture tourism open data
+- Trends in the Fukui Prefecture tourism survey
+- Daily response count transition for Fukui Prefecture tourism survey
+- Comment map for Fukui Prefecture tourism survey
+- New comments for Fukui Prefecture tourism survey in chronological order
+- Comment search
+- Ranking of tourism area satisfaction in Fukui Prefecture
+- Transition of post count by Instagram hashtag related to Fukui tourism
+
+## Open Data
+
+- [Fukui Prefecture Tourism Survey Open Data](https://github.com/code4fukui/fukui-kanko-survey/)
+- [Fukui Prefecture Instagram Hashtag Post Count](https://github.com/code4fukui/fukui-kanko-hashtag/)
+- [List of Spots on Fukui.com (List of Fukui Prefecture Tourism Spots)](https://github.com/code4fukui/fukui-spot)
