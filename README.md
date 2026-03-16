@@ -23,4 +23,4 @@ An open source web application for analyzing the Fukui Prefecture Tourism Survey
 
 ## License
 
-MIT License
+MIT License — see [LICENSE](LICENSE).
