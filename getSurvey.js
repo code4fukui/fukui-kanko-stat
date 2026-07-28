@@ -4,10 +4,10 @@ import { Day } from "https://js.sabae.cc/DateTime.js";
 const csv = [];
 const month = {};
 const fetchMonth = async (ym) => {
-  if (month[ym]) return;
-  month[ym] = true;
-  const url = "https://code4fukui.github.io/fukui-kanko-survey/monthly/" + ym + ".csv";
-  const data = await CSV.fetchJSON(url);
+  if (month[ym]) return month[ym];
+  month[ym] = (async () => {
+    const url = "https://code4fukui.github.io/fukui-kanko-survey/monthly/" + ym + ".csv";
+    const data = await CSV.fetchJSON(url);
   data.forEach(i => {
     if (i.登録エリア == "スーベニアショップ ラプトル エリア" || i.登録エリア == "スーベニアショップふらぷとる エリア") {
       i.登録エリア = "かつやま恐竜の森 エリア";
@@ -191,6 +191,8 @@ const fetchMonth = async (ym) => {
     }
     csv.push(i);
   });
+  })();
+  return month[ym];
 };
 
 export const getSurvey = async (fromd, tod) => {
